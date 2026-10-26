@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genius Open Admin Tool // GOAT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #94a3b8; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glow-card:hover { box-shadow: 0 0 25px rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); }
+        .glow-guide:hover { box-shadow: 0 0 30px rgba(99, 102, 241, 0.25); border-color: rgba(129, 140, 248, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-slate-300">
+
+    <!-- TOPBAR SIMPLE -->
+    <header class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur px-8 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <span class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-mono font-bold text-lg tracking-wider text-slate-100">GOAT<span class="text-emerald-500">//</span>CORE</span>
+            <span class="text-xs bg-amber-950/70 text-amber-300 px-2 py-0.5 rounded border border-amber-800/60 font-mono font-bold tracking-wide">PRE-ALPHA</span>
+        </div>
+        <div class="flex items-center space-x-3 text-xs font-mono">
+            <span class="hidden sm:inline px-3 py-1 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-bold">100% GRATUIT & LOCAL</span>
+            <a href="/guide.html" class="bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-700/60 px-3.5 py-2 rounded font-bold transition-all flex items-center space-x-1.5">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Guide Débutant</span>
+            </a>
+            <a href="/minecraft.html" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold transition-all flex items-center space-x-2">
+                <span>Accéder au Panel</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-8 space-y-10 flex flex-col justify-center">
+
+        <div class="text-center space-y-4 pt-2">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-mono mb-2">
+                <i class="fa-solid fa-graduation-cap text-emerald-400"></i>
+                <span>Projet d'apprentissage & d'administration simplifié</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-extrabold text-slate-100 tracking-tight font-mono">
+                Genius Open Admin Tool
+            </h1>
+            
+            <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto font-medium">
+                « Projet amateur visant à faciliter l'administration de serveurs et à la rendre accessible. »
+            </p>
+
+            <p class="text-sm text-slate-400 max-w-xl mx-auto">
+                Sans abonnement, sans télémétrie externe et sans configuration complexe : reprenez la main sur vos serveurs en local.
+            </p>
+
+            <!-- BOUTON GUIDE DÉBUTANT -->
+            <div class="pt-2">
+                <a href="/guide.html" class="inline-flex items-center space-x-3 bg-gradient-to-r from-indigo-900/60 to-purple-900/60 hover:from-indigo-800 hover:to-purple-800 text-indigo-100 border border-indigo-500/50 hover:border-indigo-400 px-6 py-3.5 rounded-xl font-mono text-sm font-bold shadow-xl shadow-indigo-950/40 transition-all hover:scale-105 glow-guide">
+                    <i class="fa-solid fa-book-open text-indigo-300 text-base"></i>
+                    <span>GUIDE DU DÉBUTANT (PRISE EN MAIN RAPIDE)</span>
+                    <i class="fa-solid fa-chevron-right text-indigo-400 text-xs"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- LES 3 MODULES D'ACCÈS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- CARTE 1 : MINECRAFT -->
+            <a href="/minecraft.html" class="bg-[#0f172a] border border-slate-800 rounded-xl p-6 flex flex-col justify-between transition-all duration-300 glow-card hover:-translate-y-1 group">
+                <div class="space-y-4">
+                    <div class="h-12 w-12 rounded-lg bg-emerald-950/80 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-2xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-cube"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-100 font-mono group-hover:text-emerald-400 transition-colors">Serveurs Minecraft</h2>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                            Création 1-clic (Vanilla, Forge, NeoForge, Sponge), importation de dossiers existants, console interactive RCON en direct, gestionnaire de RAM et éditeur de <span class="font-mono text-slate-300">server.properties</span> avec recherche.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-6 flex items-center justify-between text-xs font-mono font-bold text-emerald-400">
+                    <span>Gérer les serveurs</span>
+                    <i class="fa-solid fa-chevron-right group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- CARTE 2 : DASHBOARD -->
+            <a href="/dashboard.html" class="bg-[#0f172a] border border-slate-800 rounded-xl p-6 flex flex-col justify-between transition-all duration-300 glow-card hover:-translate-y-1 group">
+                <div class="space-y-4">
+                    <div class="h-12 w-12 rounded-lg bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 text-2xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-100 font-mono group-hover:text-cyan-400 transition-colors">Dashboard Métriques</h2>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                            Surveillance temps réel par WebSockets : charge JVM vs machine hôte, saturation de la mémoire vive et processeur avec graphiques dynamiques.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-6 flex items-center justify-between text-xs font-mono font-bold text-cyan-400">
+                    <span>Voir les métriques</span>
+                    <i class="fa-solid fa-chevron-right group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- CARTE 3 : TOOLBOX -->
+            <a href="/toolbox.html" class="bg-[#0f172a] border border-slate-800 rounded-xl p-6 flex flex-col justify-between transition-all duration-300 glow-card hover:-translate-y-1 group">
+                <div class="space-y-4">
+                    <div class="h-12 w-12 rounded-lg bg-amber-950/80 border border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-toolbox"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-100 font-mono group-hover:text-amber-400 transition-colors">Python Toolbox</h2>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                            Scripts d'automatisation, sauvegardes horodatées du dossier monde, explorateur d'arborescence et exécution de scripts personnalisés.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-6 flex items-center justify-between text-xs font-mono font-bold text-amber-400">
+                    <span>Ouvrir la boîte à outils</span>
+                    <i class="fa-solid fa-chevron-right group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- BARRE DE VALEURS -->
+        <div class="bg-[#090d16] border border-slate-800/80 rounded-lg p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-center font-mono text-xs">
+            <div class="space-y-1">
+                <div class="text-emerald-400 font-bold flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-code"></i>
+                    <span>Apprentissage Concret</span>
+                </div>
+                <p class="text-slate-400 text-[11px]">Comprendre le fonctionnement des processus Java, RCON et des flux systèmes.</p>
+            </div>
+            <div class="space-y-1">
+                <div class="text-cyan-400 font-bold flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Souveraineté Locale</span>
+                </div>
+                <p class="text-slate-400 text-[11px]">Aucun compte requis, aucun service cloud distant : vos données restent sur votre disque.</p>
+            </div>
+            <div class="space-y-1">
+                <div class="text-amber-400 font-bold flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>100% Libre & Gratuit</span>
+                </div>
+                <p class="text-slate-400 text-[11px]">Conçu comme un outil d'entraide pour simplifier la vie des administrateurs débutants.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800 bg-[#090d16] py-4 text-center text-xs font-mono text-slate-500">
+        Genius Open Admin Tool (GOAT) — Développé avec FastAPI & TailwindCSS
+    </footer>
+
+</body>
+</html>

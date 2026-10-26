@@ -1,0 +1,44 @@
+# ========================================================
+# ENVIRONNEMENT VIRTUEL & CACHE PYTHON
+# ========================================================
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ========================================================
+# COMPILATION & PACKAGING (PyInstaller / Inno Setup)
+# ========================================================
+build/
+dist/
+Output/
+*.manifest
+*.spec.bak
+
+# ========================================================
+# DONNÉES LOCALES & INSTANCES DE SERVEURS
+# ========================================================
+servers/
+servers.json
+backups/
+
+# ========================================================
+# LOGS & FICHIERS TEMPORAIRES
+# ========================================================
+logs/
+*.log
+*.log.gz
+inventaire_fichiers.txt
+
+# ========================================================
+# ÉDITEURS & SYSTÈME D'EXPLOITATION
+# ========================================================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.user
+Thumbs.db
+Desktop.ini

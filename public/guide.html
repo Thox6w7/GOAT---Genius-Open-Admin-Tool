@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOAT // GUIDE DU DÉBUTANT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #94a3b8; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-slate-300">
+
+    <!-- HEADER GOAT -->
+    <header class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <span class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-mono font-bold text-lg tracking-wider text-slate-100">GOAT<span class="text-emerald-500">//</span>DOCS</span>
+            <span class="text-xs bg-amber-950/70 text-amber-300 px-2 py-0.5 rounded border border-amber-800/60 font-mono font-bold tracking-wide">PRE-ALPHA</span>
+        </div>
+        <div class="flex items-center space-x-4 text-xs font-mono">
+            <a href="/" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded border border-slate-700 font-bold transition-all flex items-center space-x-1.5">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Retour au Panel</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- BARRE DE NAVIGATION COMMUNE -->
+    <nav class="border-b border-slate-800 bg-[#090d16] px-6 flex space-x-2 font-mono text-xs">
+        <a href="/" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-house"></i>
+            <span>ACCUEIL</span>
+        </a>
+        <a href="/minecraft.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-cube text-emerald-400"></i>
+            <span>MINECRAFT</span>
+        </a>
+        <a href="/dashboard.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>DASHBOARD METRICS</span>
+        </a>
+        <a href="/toolbox.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-toolbox"></i>
+            <span>PYTHON TOOLBOX</span>
+        </a>
+        <a href="/guide.html" class="py-3 px-4 border-b-2 border-indigo-500 text-indigo-400 font-bold flex items-center space-x-2">
+            <i class="fa-solid fa-book-open"></i>
+            <span>GUIDE DÉBUTANT</span>
+        </a>
+    </nav>
+
+    <!-- CONTENU PRINCIPAL DU GUIDE -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10 space-y-8">
+
+        <!-- EN-TÊTE PRINCIPAL -->
+        <div class="bg-[#0f172a] border border-slate-800 rounded-xl p-8">
+            <div class="flex items-center space-x-3 mb-2 font-mono text-xs font-bold text-indigo-400 uppercase tracking-widest">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span>G.O.A.T // Pre-Alpha // Documentation Locale</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold font-mono text-slate-100">
+                Guide de Prise en Main & Administration
+            </h1>
+            <p class="text-sm md:text-base text-slate-400 mt-3 leading-relaxed">
+                Administration locale de serveurs Minecraft sans abonnement, sans création de compte et sans dépendance externe. Pilotez vos mondes et surveillez vos ressources depuis votre navigateur.
+            </p>
+        </div>
+
+        <!-- SECTION 1 : DÉPLOYER OU IMPORTER -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-xl p-7 space-y-6">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <span class="h-7 w-7 rounded-lg bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center font-mono font-bold text-emerald-400 text-sm">1</span>
+                <h2 class="text-xl font-bold font-mono text-slate-100">Déployer ou Importer un Serveur</h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                Depuis l'onglet principal Minecraft, choisissez la méthode la plus adaptée à vos besoins :
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Option A -->
+                <div class="bg-[#060911] border border-emerald-900/40 rounded-lg p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-sm font-bold text-emerald-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Option A : Création en 1-Clic</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 text-[10px] font-mono border border-emerald-800">Recommandé</span>
+                    </div>
+                    <ol class="list-decimal list-inside space-y-2 text-xs text-slate-300 leading-relaxed font-sans">
+                        <li>Cliquez sur <strong class="text-emerald-400 font-mono">CRÉER UN SERVEUR</strong> (en haut à droite).</li>
+                        <li>Indiquez le nom de l'instance.</li>
+                        <li>Sélectionnez le chargeur : <strong class="text-slate-200">Vanilla, NeoForge, Forge</strong> ou <strong class="text-slate-200">Sponge</strong>.</li>
+                        <li>Choisissez la version de jeu et allouez la RAM (2 à 16 Go).</li>
+                        <li>Définissez le mot de passe RCON de commande.</li>
+                        <li><strong class="text-slate-200">Validez :</strong> les composants sont téléchargés, l'EULA validée et des ports libres incrémentés sont automatiquement assignés.</li>
+                    </ol>
+                </div>
+
+                <!-- Option B -->
+                <div class="bg-[#060911] border border-cyan-900/40 rounded-lg p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-sm font-bold text-cyan-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <span>Option B : Importation</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 text-[10px] font-mono border border-cyan-800">Existant</span>
+                    </div>
+                    <ol class="list-decimal list-inside space-y-2 text-xs text-slate-300 leading-relaxed font-sans">
+                        <li>Cliquez sur <strong class="text-cyan-400 font-mono">IMPORTER UN SERVEUR</strong>.</li>
+                        <li>Renseignez le nom d'affichage souhaité.</li>
+                        <li>Indiquez le <strong class="text-slate-200">chemin absolu</strong> du dossier (ex: <code class="bg-slate-800 px-1.5 py-0.5 rounded text-cyan-300 font-mono">C:\MonServeurMC</code>). Le répertoire doit comporter un script de démarrage ou un JAR exécutable.</li>
+                        <li>Définissez la mémoire vive allouée.</li>
+                        <li>Renseignez le port et le mot de passe RCON configurés dans votre fichier de paramètres.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 : CONFIGURATION MODDÉE -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-xl p-7 space-y-5">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <span class="h-7 w-7 rounded-lg bg-indigo-950/80 border border-indigo-500/50 flex items-center justify-center font-mono font-bold text-indigo-400 text-sm">2</span>
+                <h2 class="text-xl font-bold font-mono text-slate-100">Configuration d'un Serveur Moddé</h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                Pour déployer un serveur moddé stable et prêt à l'emploi :
+            </p>
+            <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+                <div class="flex items-start space-x-3">
+                    <span class="h-5 w-5 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400 font-bold shrink-0 mt-0.5">1</span>
+                    <span>Créez votre instance en 1-clic avec le chargeur <strong class="text-slate-100">NeoForge</strong> (ou Forge selon vos mods) et la version ciblée.</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="h-5 w-5 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400 font-bold shrink-0 mt-0.5">2</span>
+                    <span>Démarrez une première fois le serveur puis arrêtez-le afin d'initialiser l'arborescence des dossiers.</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="h-5 w-5 rounded-full bg-slate-800 flex items-center justify-center text-indigo-400 font-bold shrink-0 mt-0.5">3</span>
+                    <span>Déposez vos fichiers de mods (format <code class="bg-slate-800 px-1 rounded text-amber-300 font-mono">.jar</code>) directement dans le sous-dossier <code class="bg-slate-800 px-1 rounded text-cyan-300 font-mono">mods/</code> de l'instance.</span>
+                </div>
+            </div>
+
+            <!-- Encadré Astuce CurseForge -->
+            <div class="bg-gradient-to-r from-amber-950/30 to-[#060911] border border-amber-800/50 rounded-lg p-4 space-y-2">
+                <div class="flex items-center space-x-2 text-amber-400 font-mono font-bold text-xs">
+                    <i class="fa-solid fa-fire"></i>
+                    <span>Astuce Pratique : Gestion Simplifiée avec CurseForge</span>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Créez un profil personnalisé sur l'application CurseForge en choisissant exactement le même chargeur et la même version que votre serveur. Installez vos mods via l'application : toutes les dépendances et librairies requises seront automatiquement téléchargées. Il vous suffit ensuite de copier l'ensemble des fichiers <code class="text-amber-300 font-mono">.jar</code> générés dans le dossier <code class="text-cyan-300 font-mono">mods/</code> de votre serveur sur le panel.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 3 : ADMINISTRATION AU QUOTIDIEN -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-xl p-7 space-y-6">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <span class="h-7 w-7 rounded-lg bg-cyan-950/80 border border-cyan-500/50 flex items-center justify-center font-mono font-bold text-cyan-400 text-sm">3</span>
+                <h2 class="text-xl font-bold font-mono text-slate-100">Administration & Pilotage au Quotidien</h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                Gérez l'état de marche et les ressources attribuées à vos instances sans manipulation complexe de fichiers.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Multi-serveurs & RAM -->
+                <div class="bg-[#060911] border border-slate-800 rounded-lg p-5 space-y-3">
+                    <div class="font-mono text-sm font-bold text-cyan-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Gestion Multi-Serveurs & RAM</span>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-300">
+                        <li>
+                            <strong class="text-slate-100">Système d'onglets :</strong> Basculez instantanément d'une instance à l'autre en haut d'interface. Le serveur actif est conservé en mémoire pour toutes vos actions.
+                        </li>
+                        <li>
+                            <strong class="text-slate-100">Sélecteur de RAM dynamique :</strong> Choisissez de 2 Go à 32 Go dans la liste déroulante et cliquez sur <em class="text-cyan-300 not-italic font-bold">Appliquer</em>. Les paramètres d'allocation maximale sont mis à jour automatiquement.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Panneau de contrôle rapide -->
+                <div class="bg-[#060911] border border-slate-800 rounded-lg p-5 space-y-3">
+                    <div class="font-mono text-sm font-bold text-emerald-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-gamepad"></i>
+                        <span>Panneau de Contrôle Rapide</span>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-300">
+                        <li>
+                            <strong class="text-slate-100">ON/OFF :</strong> Démarrez en sous-processus détaché ou coupez proprement avec sauvegarde automatique du monde.
+                        </li>
+                        <li>
+                            <strong class="text-slate-100">Actions directes :</strong> Boutons rapides pour fixer le jour, dissiper la pluie, forcer une sauvegarde complète, recharger la configuration et ajuster la difficulté.
+                        </li>
+                        <li>
+                            <strong class="text-red-400 font-bold">Panic Stop :</strong> Sauvegarde d'urgence et extinction forcée en cas de gel complet.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 : CONSOLE & PARAMÈTRES -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-xl p-7 space-y-6">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <span class="h-7 w-7 rounded-lg bg-amber-950/80 border border-amber-500/50 flex items-center justify-center font-mono font-bold text-amber-400 text-sm">4</span>
+                <h2 class="text-xl font-bold font-mono text-slate-100">Console Interactive & Paramètres</h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                Supervisez le comportement du moteur Java et affinez les paramètres du monde en temps réel.
+            </p>
+
+            <!-- Flux Console & RCON -->
+            <div class="bg-[#060911] border border-slate-800 rounded-lg p-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-sm font-bold text-slate-200 flex items-center space-x-2">
+                        <i class="fa-solid fa-terminal text-amber-400"></i>
+                        <span>Flux Console & Terminal de Commandes</span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded bg-emerald-950/70 text-emerald-400 text-[10px] font-mono border border-emerald-800/60">Temps Réel</span>
+                </div>
+                <p class="text-xs text-slate-400">
+                    La console diffuse le flux continu des journaux d'activité avec colorisation syntaxique intégrée :
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs">
+                    <div class="bg-[#0b0f19] border border-slate-800 p-2.5 rounded">
+                        <span class="text-slate-300 font-bold">• Gris clair (INFO) :</span>
+                        <p class="text-slate-500 text-[11px] mt-0.5">Événements standards, connexions de joueurs et cycles normaux.</p>
+                    </div>
+                    <div class="bg-[#0b0f19] border border-slate-800 p-2.5 rounded">
+                        <span class="text-amber-400 font-bold">• Ambre (WARN) :</span>
+                        <p class="text-slate-500 text-[11px] mt-0.5">Alertes de surcharge processeur et décalages temporels (chutes de TPS).</p>
+                    </div>
+                    <div class="bg-[#0b0f19] border border-slate-800 p-2.5 rounded">
+                        <span class="text-red-400 font-bold">• Rouge (ERROR) :</span>
+                        <p class="text-slate-500 text-[11px] mt-0.5">Exceptions critiques de mods ou plantages de blocs.</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed pt-1">
+                    <strong class="text-slate-100">Terminal RCON :</strong> Envoyez instantanément vos ordres de commande en bas d'écran (ex: <code class="text-cyan-300 font-mono">op Pseudo</code>, <code class="text-cyan-300 font-mono">gamemode survival</code>, <code class="text-cyan-300 font-mono">whitelist add Joueur</code>) avec confirmation de réponse immédiate.
+                </p>
+            </div>
+
+            <!-- Éditeur server.properties -->
+            <div class="bg-[#060911] border border-slate-800 rounded-lg p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-sm font-bold text-cyan-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Éditeur Intégré de Configuration</span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-mono border border-slate-700">Sans Bloc-Notes</span>
+                </div>
+                <p class="text-xs text-slate-400">
+                    Ajustez vos variables (PVP, message d'accueil, distance de vue, difficulté) directement depuis l'interface :
+                </p>
+                <ul class="space-y-2 text-xs text-slate-300">
+                    <li>
+                        <strong class="text-slate-100">Recherche rapide :</strong> Naviguez entre les occurrences avec les touches <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700 font-mono">Entrée</kbd> et <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700 font-mono">Shift + Entrée</kbd>.
+                    </li>
+                    <li>
+                        <strong class="text-slate-100">Sauvegarde à chaud :</strong> Appliquez vos modifications ou rechargez les valeurs d'origine d'un clic.
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 5 : SURVEILLANCE & MÉTRIQUES -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-xl p-7 space-y-6">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <span class="h-7 w-7 rounded-lg bg-teal-950/80 border border-teal-500/50 flex items-center justify-center font-mono font-bold text-teal-400 text-sm">5</span>
+                <h2 class="text-xl font-bold font-mono text-slate-100">Surveillance des Performances & Métriques</h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                L'onglet Métriques fournit une télémétrie complète pour évaluer la santé de votre machine.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Charge CPU -->
+                <div class="bg-[#060911] border border-slate-800 rounded-lg p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-sm font-bold text-teal-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-microchip"></i>
+                            <span>Charge Processeur & Statut</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 text-[10px] font-mono border border-emerald-800">ONLINE</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li>
+                            <strong class="text-slate-100">CPU Machine vs Java :</strong> Distingue la charge totale de votre PC de celle générée spécifiquement par votre serveur Minecraft.
+                        </li>
+                        <li>
+                            <strong class="text-slate-100">Indicateur d'état :</strong> Pastille d'état verte (En ligne) ou rouge (Hors ligne) visible d'un coup d'œil.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Mémoire Vive -->
+                <div class="bg-[#060911] border border-slate-800 rounded-lg p-5 space-y-3">
+                    <div class="font-mono text-sm font-bold text-cyan-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-memory"></i>
+                        <span>Mémoire Vive & Historique</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li>
+                            <strong class="text-slate-100">Jauges RAM :</strong> Affichage en direct de l'empreinte mémoire exacte du processus Minecraft en Mo et Go.
+                        </li>
+                        <li>
+                            <strong class="text-slate-100">Graphiques dynamiques :</strong> Courbes de suivi pour identifier les fuites de mémoire et anticiper les baisses de fluidité.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 : BOÎTE À OUTILS -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-xl p-7 space-y-5">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <span class="h-7 w-7 rounded-lg bg-amber-950/80 border border-amber-500/50 flex items-center justify-center font-mono font-bold text-amber-400 text-sm">6</span>
+                <h2 class="text-xl font-bold font-mono text-slate-100">Boîte à Outils & Utilitaires</h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                Un ensemble d'outils automatisés pour maintenir vos mondes en toute sécurité :
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="bg-[#060911] border border-slate-800 p-4 rounded-lg space-y-2">
+                    <div class="font-mono font-bold text-amber-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-file-zipper"></i>
+                        <span>Sauvegarde Automatique</span>
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">
+                        Détecte le serveur actif, compresse le dossier de la carte dans une archive horodatée (ex: <code class="text-amber-300 font-mono">backup_MonMonde_20261025.zip</code>) et confirme le volume généré.
+                    </p>
+                </div>
+
+                <div class="bg-[#060911] border border-slate-800 p-4 rounded-lg space-y-2">
+                    <div class="font-mono font-bold text-cyan-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-folder-tree"></i>
+                        <span>Explorateur d'Arborescence</span>
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">
+                        Accédez à la structure de vos répertoires directement depuis l'interface sans encombrement de fichiers temporaires.
+                    </p>
+                </div>
+
+                <div class="bg-[#060911] border border-slate-800 p-4 rounded-lg space-y-2">
+                    <div class="font-mono font-bold text-emerald-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-terminal"></i>
+                        <span>Scripts Personnalisés</span>
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">
+                        Déclenchez vos scripts utilitaires en un clic avec affichage des résultats dans la console dédiée.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 : MAINTENANCE & SUPPRESSION -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-xl p-7 space-y-5">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <span class="h-7 w-7 rounded-lg bg-red-950/80 border border-red-500/50 flex items-center justify-center font-mono font-bold text-red-400 text-sm">7</span>
+                <h2 class="text-xl font-bold font-mono text-slate-100">Maintenance & Suppression d'un Serveur</h2>
+            </div>
+            <p class="text-xs text-slate-400">
+                Deux options sont prévues pour retirer une instance selon le niveau de conservation souhaité :
+            </p>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left font-mono text-xs border border-slate-800 rounded-lg overflow-hidden">
+                    <thead class="bg-[#060911] text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">Mode</th>
+                            <th class="p-3">Opération effectuée</th>
+                            <th class="p-3">Données sur le disque</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 text-slate-300">
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-bold text-amber-400">Suppression simple</td>
+                            <td class="p-3">Désenregistre le serveur de la liste du panel d'administration.</td>
+                            <td class="p-3 text-emerald-400">Intactes (mondes, configurations et mods conservés).</td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-bold text-red-400">Suppression totale</td>
+                            <td class="p-3">Arrête le serveur, stoppe les processus résiduels et efface le dossier.</td>
+                            <td class="p-3 text-red-400 font-bold">Destruction définitive (requiert une double confirmation).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800 bg-[#090d16] py-5 text-center text-xs font-mono text-slate-500">
+        Genius Open Admin Tool (GOAT) — Centre de Documentation & Guide de Prise en Main
+    </footer>
+
+</body>
+</html>

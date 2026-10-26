@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOAT // SERVEURS MINECRAFT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #94a3b8; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glow-red { box-shadow: 0 0 25px rgba(239, 68, 68, 0.45); }
+        .glow-green { box-shadow: 0 0 15px rgba(16, 185, 129, 0.35); }
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-slate-300">
+
+    <!-- HEADER DE NAVIGATION GOAT -->
+    <header class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <span class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-mono font-bold text-lg tracking-wider text-slate-100">GOAT<span class="text-emerald-500">//</span>OPS</span>
+            <span class="text-xs bg-amber-950/70 text-amber-300 px-2 py-0.5 rounded border border-amber-800/60 font-mono font-bold tracking-wide">PRE-ALPHA</span>
+        </div>
+
+        <div class="flex items-center space-x-6 text-xs font-mono">
+            <div class="flex items-center space-x-2">
+                <span id="badge-mc" class="h-2 w-2 rounded-full bg-red-500"></span>
+                <span>MINECRAFT: <span id="txt-mc" class="text-red-400 font-bold">OFFLINE</span></span>
+            </div>
+            <button onclick="triggerPanic()" class="bg-red-950/80 hover:bg-red-800 text-red-200 border border-red-600/50 px-3 py-1.5 rounded font-mono font-bold text-xs flex items-center space-x-2 transition-all glow-red">
+                <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+                <span>PANIC STOP</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- BARRE DE NAVIGATION COMMUNE -->
+    <nav class="border-b border-slate-800 bg-[#090d16] px-6 flex space-x-2 font-mono text-xs">
+        <a href="/" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-house"></i>
+            <span>ACCUEIL</span>
+        </a>
+        <a href="/minecraft.html" class="py-3 px-4 border-b-2 border-emerald-500 text-emerald-400 font-bold flex items-center space-x-2">
+            <i class="fa-solid fa-cube text-emerald-400"></i>
+            <span>MINECRAFT</span>
+        </a>
+        <a href="/dashboard.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>DASHBOARD METRICS</span>
+        </a>
+        <a href="/toolbox.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-toolbox"></i>
+            <span>PYTHON TOOLBOX</span>
+        </a>
+        <a href="/guide.html" class="py-3 px-4 border-b-2 border-transparent text-indigo-400 hover:text-indigo-300 flex items-center space-x-2">
+            <i class="fa-solid fa-book-open"></i>
+            <span>GUIDE DÉBUTANT</span>
+        </a>
+    </nav>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-1 p-6 overflow-y-auto space-y-6">
+
+        <!-- SÉLECTION DES ONGLETS SERVEURS & ACTIONS D'AJOUT -->
+        <div class="flex flex-wrap items-center justify-between border-b border-slate-800 pb-3 gap-3">
+            <div id="server-tabs" class="flex flex-wrap items-center gap-2"></div>
+            <div class="flex items-center space-x-2">
+                <button onclick="openImportServerModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs px-3.5 py-2 rounded border border-slate-700 flex items-center space-x-1.5 font-bold transition-all">
+                    <i class="fa-solid fa-folder-open text-cyan-400"></i>
+                    <span>IMPORTER UN SERVEUR</span>
+                </button>
+                <button onclick="openNewServerModal()" class="bg-emerald-600/90 hover:bg-emerald-500 text-white font-mono text-xs px-3.5 py-2 rounded border border-emerald-500/50 flex items-center space-x-1.5 font-bold transition-all shadow-lg shadow-emerald-950/30">
+                    <i class="fa-solid fa-plus text-emerald-200"></i>
+                    <span>CRÉER UN SERVEUR</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ZONE ACTIVE DU SERVEUR -->
+        <div id="server-active-view" class="space-y-6">
+
+            <!-- BANDEAU DE STATUT & INFORMATIONS DU SERVEUR -->
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="h-10 w-10 rounded bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-lg">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <div>
+                        <div class="font-mono font-bold text-sm text-slate-100" id="current-server-title">Chargement...</div>
+                        <div class="font-mono text-xs text-slate-400 flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
+                            <span>ID: <span id="current-server-id" class="text-slate-300">--</span></span>
+                            <span>•</span>
+                            <span>PORT JEU: <span id="current-server-port" class="text-emerald-400 font-bold">25565</span></span>
+                            <span>•</span>
+                            <span>RCON: <span id="current-server-endpoint" class="text-cyan-400 font-bold">25575</span></span>
+                            <span>•</span>
+                            <span>DOSSIER: <span id="current-server-folder" class="text-slate-300 text-[11px]">--</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTRÔLE RAM & BOUTONS D'ACTION -->
+                <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+                    <div class="flex items-center bg-[#060911] border border-slate-700 rounded px-2 py-1 space-x-1.5">
+                        <i class="fa-solid fa-memory text-cyan-400 text-xs"></i>
+                        <span class="text-slate-400 text-[11px]">RAM:</span>
+                        <select id="server-ram-select" class="bg-transparent text-cyan-300 font-bold focus:outline-none cursor-pointer">
+                            <option value="2G">2 Go</option>
+                            <option value="4G">4 Go</option>
+                            <option value="6G">6 Go</option>
+                            <option value="8G">8 Go</option>
+                            <option value="10G">10 Go</option>
+                            <option value="12G">12 Go</option>
+                            <option value="16G">16 Go</option>
+                            <option value="24G">24 Go</option>
+                            <option value="32G">32 Go</option>
+                        </select>
+                        <button onclick="applyServerRamChange()" title="Appliquer la RAM au run.bat" class="ml-1 text-[10px] bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 px-2 py-0.5 rounded border border-cyan-700/50 font-bold">
+                            Appliquer
+                        </button>
+                    </div>
+
+                    <span class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300" id="current-server-status">INITIALISATION</span>
+                    <button onclick="togglePropertiesEditor()" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 px-3 py-1.5 rounded flex items-center space-x-1.5 transition-all">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>CONFIG</span>
+                    </button>
+                    <button onclick="confirmDeleteActiveServer()" class="bg-red-950/50 hover:bg-red-900/80 text-red-300 border border-red-800/40 px-3 py-1.5 rounded flex items-center space-x-1.5 transition-all">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>SUPPRIMER</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ÉDITEUR DE FICHIER SERVER.PROPERTIES AVEC RECHERCHE -->
+            <div id="properties-editor-panel" class="hidden bg-[#0f172a] border border-cyan-800/40 rounded-lg p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div class="flex items-center space-x-2 font-mono text-xs font-bold text-cyan-400">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>ÉDITEUR SERVER.PROPERTIES</span>
+                    </div>
+
+                    <!-- BARRE DE RECHERCHE DYNAMIQUE -->
+                    <div class="flex items-center space-x-2 bg-[#060911] border border-slate-700 rounded px-2.5 py-1">
+                        <i class="fa-solid fa-magnifying-glass text-slate-500 text-xs"></i>
+                        <input id="prop-search-input" type="text" placeholder="Rechercher (ex: port, motd)..." oninput="handlePropSearch()" onkeydown="handlePropSearchKeydown(event)" class="bg-transparent text-slate-200 font-mono text-xs focus:outline-none w-44 md:w-56">
+                        <span id="prop-search-count" class="text-[10px] font-mono text-slate-500 min-w-[36px] text-center">0/0</span>
+                        <button type="button" onclick="navigatePropMatch(-1)" class="text-slate-400 hover:text-slate-200 text-xs px-1" title="Précédent (Shift+Entrée)">
+                            <i class="fa-solid fa-chevron-up"></i>
+                        </button>
+                        <button type="button" onclick="navigatePropMatch(1)" class="text-slate-400 hover:text-slate-200 text-xs px-1" title="Suivant (Entrée)">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button onclick="loadPropertiesFile()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs rounded border border-slate-700 flex items-center space-x-1">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>Recharger</span>
+                        </button>
+                        <button onclick="savePropertiesFile()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded flex items-center space-x-1">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Sauvegarder</span>
+                        </button>
+                    </div>
+                </div>
+
+                <textarea id="properties-textarea" class="w-full h-72 bg-[#060911] border border-slate-800 rounded p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-cyan-500 terminal-scroll leading-relaxed" placeholder="Chargement du fichier server.properties..."></textarea>
+                <div class="text-[11px] font-mono text-slate-500 italic">
+                    * Astuce : Tapez votre recherche ci-dessus, puis appuyez sur <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Entrée</kbd> pour naviguer directement d'un paramètre à l'autre.
+                </div>
+            </div>
+
+            <!-- ACTIONS RAPIDES -->
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="font-mono text-sm font-bold text-slate-200">PANNEAU DE CONTRÔLE RAPIDE</span>
+                    <span class="font-mono text-[11px] text-slate-500">Actions directes console & process</span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 font-mono text-xs">
+                    <button onclick="startActiveServer()" class="bg-emerald-950/80 hover:bg-emerald-800 text-emerald-200 border border-emerald-600/60 p-2.5 rounded flex items-center justify-center space-x-2 font-bold transition-all glow-green">
+                        <i class="fa-solid fa-play"></i>
+                        <span>ON (Start)</span>
+                    </button>
+                    <button onclick="stopActiveServer()" class="bg-red-950/80 hover:bg-red-800 text-red-200 border border-red-600/60 p-2.5 rounded flex items-center justify-center space-x-2 font-bold transition-all">
+                        <i class="fa-solid fa-power-off"></i>
+                        <span>OFF (Stop)</span>
+                    </button>
+                    <button onclick="sendRcon('time set day')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded border border-slate-700 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-sun text-amber-400"></i>
+                        <span>Time Day</span>
+                    </button>
+                    <button onclick="sendRcon('weather clear')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded border border-slate-700 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-cloud-sun text-cyan-400"></i>
+                        <span>Météo Claire</span>
+                    </button>
+                    <button onclick="sendRcon('save-all')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded border border-slate-700 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-floppy-disk text-emerald-400"></i>
+                        <span>Save</span>
+                    </button>
+                    <button onclick="sendRcon('reload')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded border border-slate-700 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate text-blue-400"></i>
+                        <span>Reload JVM</span>
+                    </button>
+                    <button onclick="sendRcon('whitelist reload')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded border border-slate-700 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-users-gear text-purple-400"></i>
+                        <span>Whitelist</span>
+                    </button>
+                    <div class="relative">
+                        <select id="diff-selector" onchange="changeDifficulty(this.value)" class="w-full h-full bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded border border-slate-700 focus:outline-none focus:border-emerald-500 font-mono text-xs cursor-pointer">
+                            <option value="" disabled selected>Difficulté ▾</option>
+                            <option value="peaceful">Peaceful</option>
+                            <option value="easy">Easy</option>
+                            <option value="normal">Normal</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONSOLE INTERACTIVE UNIFIÉE (JVM LOGS + RCON) -->
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2 font-mono text-xs font-bold text-slate-300">
+                        <i class="fa-solid fa-terminal text-emerald-400"></i>
+                        <span>CONSOLE SERVEUR EN DIRECT (JVM LOGS & RCON)</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-[11px] font-mono">
+                        <span id="log-status" class="text-emerald-400">CONNECTÉ</span>
+                        <button onclick="document.getElementById('console-output').innerHTML = ''" class="text-slate-500 hover:text-slate-300">Effacer</button>
+                    </div>
+                </div>
+                <div id="console-output" class="h-96 bg-[#060911] border border-slate-900 rounded p-4 font-mono text-xs overflow-y-auto terminal-scroll text-slate-300 space-y-1 mb-3">
+                    <div class="text-slate-600">[GOAT] Connexion à la console en direct...</div>
+                </div>
+                <form onsubmit="handleConsoleSubmit(event)" class="flex space-x-2">
+                    <input id="rcon-input" type="text" placeholder="Entrez une commande (/say Bonjour, op Steve, tps...)" class="flex-1 bg-[#060911] border border-slate-800 text-slate-200 px-4 py-2 text-sm font-mono rounded focus:outline-none focus:border-emerald-500">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 font-mono text-sm font-bold rounded">
+                        ENVOYER
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODALE : CRÉER UN SERVEUR -->
+    <div id="new-server-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#0f172a] border border-slate-800 rounded-lg max-w-lg w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2 font-mono text-sm font-bold text-slate-100">
+                    <i class="fa-solid fa-plus text-emerald-400"></i>
+                    <span>CRÉER UN NOUVEAU SERVEUR</span>
+                </div>
+                <button onclick="closeNewServerModal()" class="text-slate-500 hover:text-slate-300">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="handleInstallServerSubmit(event)" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Nom du serveur :</label>
+                    <input id="install-srv-name" required type="text" placeholder="Ex: Survie NeoForge 1.21" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Chargeur (Loader) :</label>
+                        <select id="install-srv-loader" onchange="fetchVersionsForLoader(this.value)" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-emerald-500">
+                            <option value="vanilla">Vanilla</option>
+                            <option value="neoforge">NeoForge</option>
+                            <option value="forge">Forge</option>
+                            <option value="sponge">Sponge</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Version en ligne :</label>
+                        <select id="install-srv-version" required class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-emerald-500">
+                            <option value="">Sélectionne un loader...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">RAM allouée (-Xmx) :</label>
+                        <select id="install-srv-ram" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-emerald-500 cursor-pointer">
+                            <option value="2G">2 Go</option>
+                            <option value="4G" selected>4 Go (Standard)</option>
+                            <option value="6G">6 Go</option>
+                            <option value="8G">8 Go (Modpacks)</option>
+                            <option value="12G">12 Go</option>
+                            <option value="16G">16 Go</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Mot de passe RCON :</label>
+                        <input id="install-srv-pass" type="text" value="nexus_secret_pwd" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div id="install-loader-indicator" class="hidden p-3 rounded bg-cyan-950/40 border border-cyan-800/40 text-cyan-300 text-xs flex items-center space-x-2">
+                    <i class="fa-solid fa-spinner animate-spin"></i>
+                    <span>Téléchargement des fichiers et synchronisation des ports...</span>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeNewServerModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded">Annuler</button>
+                    <button id="btn-install-submit" type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded flex items-center space-x-1.5">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Créer & Télécharger</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE : IMPORTER UN SERVEUR -->
+    <div id="import-server-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#0f172a] border border-slate-800 rounded-lg max-w-lg w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2 font-mono text-sm font-bold text-slate-100">
+                    <i class="fa-solid fa-folder-open text-cyan-400"></i>
+                    <span>IMPORTER UN SERVEUR EXISTANT</span>
+                </div>
+                <button onclick="closeImportServerModal()" class="text-slate-500 hover:text-slate-300">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="handleImportServerSubmit(event)" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Nom d'affichage du serveur :</label>
+                    <input id="import-srv-name" required type="text" placeholder="Ex: Mon Serveur Moddé Local" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-cyan-500">
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1">Chemin absolu du dossier du serveur :</label>
+                    <input id="import-srv-dir" required type="text" placeholder="Ex: C:\Users\slong\Desktop\ServeurMC" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-cyan-500">
+                    <span class="text-[10px] text-slate-500">Le dossier doit contenir run.bat ou un fichier server.jar</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">RAM (-Xmx) :</label>
+                        <select id="import-srv-ram" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-cyan-500 cursor-pointer">
+                            <option value="2G">2 Go</option>
+                            <option value="4G" selected>4 Go</option>
+                            <option value="6G">6 Go</option>
+                            <option value="8G">8 Go</option>
+                            <option value="12G">12 Go</option>
+                            <option value="16G">16 Go</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Port RCON :</label>
+                        <input id="import-srv-rcon" type="number" value="25575" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Mot de passe RCON :</label>
+                        <input id="import-srv-pass" type="text" value="nexus_secret_pwd" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeImportServerModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded flex items-center space-x-1.5">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Enregistrer le serveur</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let serversList = [];
+        let activeServerId = localStorage.getItem('goat_active_server') || null;
+        let logsWs = null;
+
+        let searchMatches = [];
+        let currentMatchIndex = -1;
+
+        async function loadServers() {
+            try {
+                const res = await fetch('/api/mc/servers');
+                serversList = await res.json();
+                
+                if (!serversList.some(s => s.id === activeServerId)) {
+                    activeServerId = serversList.length > 0 ? serversList[0].id : null;
+                }
+
+                if (activeServerId) {
+                    localStorage.setItem('goat_active_server', activeServerId);
+                }
+
+                renderServerTabs();
+                renderActiveServerInfo();
+                if (activeServerId) {
+                    connectLogsWs(activeServerId);
+                } else {
+                    document.getElementById('console-output').innerHTML = '<div class="text-slate-600">Aucun serveur configuré. Cliquez sur « Créer » ou « Importer ».</div>';
+                }
+            } catch (err) {
+                console.error("Erreur chargement serveurs:", err);
+            }
+        }
+
+        function renderServerTabs() {
+            const container = document.getElementById('server-tabs');
+            container.innerHTML = '';
+
+            serversList.forEach(srv => {
+                const isActive = srv.id === activeServerId;
+                const btn = document.createElement('button');
+                btn.className = `px-3.5 py-1.5 rounded font-mono text-xs flex items-center space-x-2 border transition-all ${
+                    isActive 
+                    ? 'bg-slate-800 border-emerald-500/60 text-emerald-400 font-bold shadow-md' 
+                    : 'bg-[#0f172a] border-slate-800 text-slate-400 hover:text-slate-200'
+                }`;
+                btn.innerHTML = `
+                    <span class="h-2 w-2 rounded-full ${srv.status === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}"></span>
+                    <span>${srv.name}</span>
+                `;
+                btn.onclick = () => {
+                    activeServerId = srv.id;
+                    localStorage.setItem('goat_active_server', activeServerId);
+                    renderServerTabs();
+                    renderActiveServerInfo();
+                    connectLogsWs(activeServerId);
+                    document.getElementById('properties-editor-panel').classList.add('hidden');
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderActiveServerInfo() {
+            const current = serversList.find(s => s.id === activeServerId);
+            if (!current) {
+                document.getElementById('current-server-title').textContent = "Aucun serveur";
+                document.getElementById('current-server-id').textContent = "--";
+                document.getElementById('current-server-port').textContent = "--";
+                document.getElementById('current-server-endpoint').textContent = "--:--";
+                document.getElementById('current-server-folder').textContent = "--";
+                document.getElementById('current-server-status').textContent = "AUCUN";
+                return;
+            }
+
+            document.getElementById('current-server-title').textContent = current.name;
+            document.getElementById('current-server-id').textContent = current.id;
+            document.getElementById('current-server-port').textContent = current.server_port || 25565;
+            document.getElementById('current-server-endpoint').textContent = `${current.rcon_host}:${current.rcon_port}`;
+            document.getElementById('current-server-folder').textContent = current.server_dir || './';
+            document.getElementById('current-server-status').textContent = (current.status || 'READY').toUpperCase();
+            
+            const ramSelect = document.getElementById('server-ram-select');
+            if (ramSelect) {
+                ramSelect.value = current.ram_max || "4G";
+            }
+        }
+
+        async function applyServerRamChange() {
+            if (!activeServerId) return;
+            const ramVal = document.getElementById('server-ram-select').value;
+
+            try {
+                const res = await fetch('/api/mc/servers/ram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ server_id: activeServerId, ram_max: ramVal })
+                });
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    alert(`${data.message}\nNote : Si le serveur tourne déjà, redémarrez-le pour appliquer la nouvelle RAM.`);
+                    await loadServers();
+                } else {
+                    alert(data.message || "Erreur de mise à jour");
+                }
+            } catch (err) {
+                alert(`Erreur réseau : ${err.message}`);
+            }
+        }
+
+        async function togglePropertiesEditor() {
+            const panel = document.getElementById('properties-editor-panel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                await loadPropertiesFile();
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        async function loadPropertiesFile() {
+            if (!activeServerId) return;
+            const textarea = document.getElementById('properties-textarea');
+            textarea.value = "Chargement en cours...";
+
+            try {
+                const res = await fetch(`/api/mc/properties?server_id=${activeServerId}`);
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    textarea.value = data.content;
+                    handlePropSearch();
+                } else {
+                    textarea.value = `# Erreur : ${data.message}`;
+                }
+            } catch (err) {
+                textarea.value = `# Erreur de connexion : ${err.message}`;
+            }
+        }
+
+        async function savePropertiesFile() {
+            if (!activeServerId) return;
+            const textarea = document.getElementById('properties-textarea');
+            const content = textarea.value;
+
+            try {
+                const res = await fetch('/api/mc/properties', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ server_id: activeServerId, content: content })
+                });
+                const data = await res.json();
+                alert(data.message || (data.status === 'ok' ? 'Sauvegardé !' : 'Erreur'));
+            } catch (err) {
+                alert(`Erreur lors de la sauvegarde : ${err.message}`);
+            }
+        }
+
+        function handlePropSearch() {
+            const query = document.getElementById('prop-search-input').value.trim().toLowerCase();
+            const textarea = document.getElementById('properties-textarea');
+            const text = textarea.value.toLowerCase();
+            const countLabel = document.getElementById('prop-search-count');
+
+            searchMatches = [];
+            currentMatchIndex = -1;
+
+            if (!query) {
+                countLabel.textContent = "0/0";
+                return;
+            }
+
+            let pos = text.indexOf(query);
+            while (pos !== -1) {
+                searchMatches.push({ start: pos, end: pos + query.length });
+                pos = text.indexOf(query, pos + 1);
+            }
+
+            if (searchMatches.length > 0) {
+                currentMatchIndex = 0;
+                countLabel.textContent = `1/${searchMatches.length}`;
+                highlightPropMatch();
+            } else {
+                countLabel.textContent = "0/0";
+            }
+        }
+
+        function handlePropSearchKeydown(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                navigatePropMatch(event.shiftKey ? -1 : 1);
+            }
+        }
+
+        function navigatePropMatch(delta) {
+            if (searchMatches.length === 0) return;
+            currentMatchIndex = (currentMatchIndex + delta + searchMatches.length) % searchMatches.length;
+            document.getElementById('prop-search-count').textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
+            highlightPropMatch();
+        }
+
+        function highlightPropMatch() {
+            if (currentMatchIndex < 0 || currentMatchIndex >= searchMatches.length) return;
+            const match = searchMatches[currentMatchIndex];
+            const textarea = document.getElementById('properties-textarea');
+
+            textarea.focus();
+            textarea.setSelectionRange(match.start, match.end);
+
+            const linesBefore = textarea.value.substring(0, match.start).split('\n').length;
+            const lineHeight = 19;
+            textarea.scrollTop = Math.max(0, (linesBefore * lineHeight) - 100);
+        }
+
+        function openImportServerModal() {
+            const m = document.getElementById('import-server-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeImportServerModal() {
+            const m = document.getElementById('import-server-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        async function handleImportServerSubmit(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('import-srv-name').value.trim(),
+                server_dir: document.getElementById('import-srv-dir').value.trim(),
+                ram_max: document.getElementById('import-srv-ram').value,
+                rcon_port: parseInt(document.getElementById('import-srv-rcon').value, 10) || 25575,
+                rcon_pass: document.getElementById('import-srv-pass').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/mc/servers/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.status === 'ok') {
+                    closeImportServerModal();
+                    activeServerId = data.server.id;
+                    localStorage.setItem('goat_active_server', activeServerId);
+                    await loadServers();
+                    alert(`Serveur [${data.server.name}] importé avec succès !`);
+                } else {
+                    alert(data.message || "Erreur lors de l'importation");
+                }
+            } catch (err) {
+                alert(`Erreur réseau : ${err.message}`);
+            }
+        }
+
+        async function confirmDeleteActiveServer() {
+            if (!activeServerId) return alert("Aucun serveur sélectionné !");
+            const current = serversList.find(s => s.id === activeServerId);
+            if (!current) return;
+
+            const deleteFiles = confirm(
+                `Supprimer le serveur [${current.name}] :\n\n` +
+                `• Cliquez sur OK pour SUPPRIMER LE DOSSIER ET LES FICHIERS DU DISQUE.\n` +
+                `• Cliquez sur Annuler pour le retirer seulement de l'affichage du panel.`
+            );
+
+            if (deleteFiles) {
+                if (!confirm(`ATTENTION CONFIRMATION FINALE :\nLe dossier :\n${current.server_dir}\nva être complètement détruit. Continuer ?`)) {
+                    return;
+                }
+            }
+
+            try {
+                const res = await fetch(`/api/mc/servers/${activeServerId}?delete_files=${deleteFiles}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                alert(data.message || "Opération effectuée.");
+                activeServerId = null;
+                localStorage.removeItem('goat_active_server');
+                await loadServers();
+            } catch (err) {
+                alert(`Erreur suppression : ${err.message}`);
+            }
+        }
+
+        function connectLogsWs(serverId) {
+            if (logsWs) {
+                logsWs.close();
+            }
+
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            logsWs = new WebSocket(`${wsProtocol}//${window.location.host}/ws/logs?server_id=${serverId}`);
+            const logStatus = document.getElementById('log-status');
+
+            logStatus.textContent = "CONNEXION...";
+            logStatus.className = "text-amber-400";
+
+            logsWs.onopen = () => {
+                logStatus.textContent = "EN DIRECT";
+                logStatus.className = "text-emerald-400 font-bold";
+            };
+
+            logsWs.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.line) {
+                    appendConsoleLine(data.line);
+                }
+            };
+
+            logsWs.onclose = () => {
+                logStatus.textContent = "DÉCONNECTÉ";
+                logStatus.className = "text-red-400";
+            };
+        }
+
+        function appendConsoleLine(line, isCommand = false) {
+            const consoleBox = document.getElementById('console-output');
+            const el = document.createElement('div');
+
+            if (isCommand) {
+                el.className = "text-cyan-400 font-bold";
+            } else if (line.includes('WARN')) {
+                el.className = "text-amber-400";
+            } else if (line.includes('ERROR') || line.includes('Exception') || line.includes('FATAL')) {
+                el.className = "text-red-400 font-bold";
+            } else if (line.includes('INFO')) {
+                el.className = "text-slate-300";
+            } else {
+                el.className = "text-slate-400";
+            }
+
+            el.textContent = line;
+            consoleBox.appendChild(el);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        async function startActiveServer() {
+            if (!activeServerId) return alert("Aucun serveur sélectionné !");
+            const current = serversList.find(s => s.id === activeServerId);
+
+            appendConsoleLine(`> Ordre de démarrage envoyé pour ${activeServerId}...`, true);
+
+            const res = await fetch('/api/mc/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    server_id: activeServerId,
+                    server_dir: current ? (current.server_dir || '') : ''
+                })
+            });
+            const data = await res.json();
+            appendConsoleLine(data.message, data.status !== 'ok');
+            loadServers();
+        }
+
+        async function stopActiveServer() {
+            if (!activeServerId) return;
+            if (confirm("Arrêter proprement le serveur via /stop ?")) {
+                appendConsoleLine(`> /stop`, true);
+                const res = await fetch('/api/mc/stop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ server_id: activeServerId })
+                });
+                const data = await res.json();
+                appendConsoleLine(data.response || data.message);
+                loadServers();
+            }
+        }
+
+        async function changeDifficulty(diff) {
+            if (!activeServerId || !diff) return;
+            appendConsoleLine(`> /difficulty ${diff}`, true);
+            const res = await fetch('/api/mc/difficulty', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ server_id: activeServerId, difficulty: diff })
+            });
+            const data = await res.json();
+            appendConsoleLine(data.response || data.message);
+            document.getElementById('diff-selector').value = "";
+        }
+
+        async function sendRcon(cmd) {
+            if (!activeServerId) return alert("Aucun serveur actif !");
+            appendConsoleLine(`> ${cmd}`, true);
+
+            const req = await fetch('/api/mc/command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ server_id: activeServerId, command: cmd })
+            });
+            const res = await req.json();
+            appendConsoleLine(res.response || res.message);
+        }
+
+        function handleConsoleSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('rcon-input');
+            if (input.value.trim()) {
+                sendRcon(input.value.trim());
+                input.value = '';
+            }
+        }
+
+        async function triggerPanic() {
+            if (!activeServerId) return;
+            if (confirm(`ARRÊT D'URGENCE POUR LE SERVEUR [${activeServerId}] ?`)) {
+                appendConsoleLine(`> [PANIC STOP]`, true);
+                const req = await fetch('/api/mc/panic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ server_id: activeServerId })
+                });
+                const res = await req.json();
+                alert(res.response || res.message);
+                loadServers();
+            }
+        }
+
+        async function fetchVersionsForLoader(loader) {
+            const select = document.getElementById('install-srv-version');
+            select.innerHTML = '<option value="">Chargement des versions...</option>';
+
+            try {
+                const res = await fetch(`/api/mc/remote-versions?loader=${loader}`);
+                const data = await res.json();
+                select.innerHTML = '';
+
+                data.versions.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                select.innerHTML = '<option value="">Erreur de récupération</option>';
+            }
+        }
+
+        function openNewServerModal() {
+            const m = document.getElementById('new-server-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            fetchVersionsForLoader(document.getElementById('install-srv-loader').value);
+        }
+
+        function closeNewServerModal() {
+            const m = document.getElementById('new-server-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            document.getElementById('install-loader-indicator').classList.add('hidden');
+            document.getElementById('btn-install-submit').disabled = false;
+        }
+
+        async function handleInstallServerSubmit(e) {
+            e.preventDefault();
+            const indicator = document.getElementById('install-loader-indicator');
+            const submitBtn = document.getElementById('btn-install-submit');
+            
+            indicator.classList.remove('hidden');
+            submitBtn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('install-srv-name').value.trim(),
+                loader: document.getElementById('install-srv-loader').value,
+                version: document.getElementById('install-srv-version').value,
+                ram_max: document.getElementById('install-srv-ram').value,
+                rcon_pass: document.getElementById('install-srv-pass').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/mc/servers/install', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.status === 'ok') {
+                    closeNewServerModal();
+                    activeServerId = data.server.id;
+                    localStorage.setItem('goat_active_server', activeServerId);
+                    await loadServers();
+                    alert(`Serveur créé avec succès !\nPort de jeu : ${data.server.server_port}\nPort RCON : ${data.server.rcon_port}\nRAM : ${data.server.ram_max}`);
+                } else {
+                    alert(data.message || "Erreur lors de la création");
+                }
+            } catch (err) {
+                alert(`Erreur réseau : ${err.message}`);
+            } finally {
+                indicator.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const telemWs = new WebSocket(`${wsProtocol}//${window.location.host}/ws/telemetry`);
+
+        telemWs.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const mcBadge = document.getElementById('badge-mc');
+            const mcTxt = document.getElementById('txt-mc');
+            if (data.mc_running) {
+                mcBadge.className = "h-2 w-2 rounded-full bg-emerald-500";
+                mcTxt.textContent = "ONLINE";
+                mcTxt.className = "text-emerald-400 font-bold";
+            } else {
+                mcBadge.className = "h-2 w-2 rounded-full bg-red-500";
+                mcTxt.textContent = "OFFLINE";
+                mcTxt.className = "text-red-400 font-bold";
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadServers();
+        });
+    </script>
+</body>
+</html>

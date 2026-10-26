@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOAT // DASHBOARD METRICS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #94a3b8; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-slate-300">
+
+    <!-- HEADER GOAT -->
+    <header class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <span class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-mono font-bold text-lg tracking-wider text-slate-100">GOAT<span class="text-emerald-500">//</span>METRICS</span>
+            <span class="text-xs bg-amber-950/70 text-amber-300 px-2 py-0.5 rounded border border-amber-800/60 font-mono font-bold tracking-wide">PRE-ALPHA</span>
+        </div>
+        <div class="flex items-center space-x-4 text-xs font-mono">
+            <div class="flex items-center space-x-2">
+                <span id="badge-mc" class="h-2 w-2 rounded-full bg-red-500"></span>
+                <span>MINECRAFT: <span id="txt-mc" class="text-red-400 font-bold">OFFLINE</span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- BARRE DE NAVIGATION COMMUNE -->
+    <nav class="border-b border-slate-800 bg-[#090d16] px-6 flex space-x-2 font-mono text-xs">
+        <a href="/" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-house"></i>
+            <span>ACCUEIL</span>
+        </a>
+        <a href="/minecraft.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-cube text-emerald-400"></i>
+            <span>MINECRAFT</span>
+        </a>
+        <a href="/dashboard.html" class="py-3 px-4 border-b-2 border-cyan-500 text-cyan-400 font-bold flex items-center space-x-2">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>DASHBOARD METRICS</span>
+        </a>
+        <a href="/toolbox.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-toolbox"></i>
+            <span>PYTHON TOOLBOX</span>
+        </a>
+        <a href="/guide.html" class="py-3 px-4 border-b-2 border-transparent text-indigo-400 hover:text-indigo-300 flex items-center space-x-2">
+            <i class="fa-solid fa-book-open"></i>
+            <span>GUIDE DÉBUTANT</span>
+        </a>
+    </nav>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-1 p-6 space-y-6">
+
+        <!-- CARTES DE MÉTRIQUES INSTANTANÉES -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs">
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-4 space-y-2">
+                <div class="text-slate-400 flex items-center justify-between">
+                    <span>CPU MACHINE</span>
+                    <i class="fa-solid fa-microchip text-slate-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-slate-100" id="val-cpu-machine">0 %</div>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div id="bar-cpu-machine" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-4 space-y-2">
+                <div class="text-slate-400 flex items-center justify-between">
+                    <span>CPU MINECRAFT (JVM)</span>
+                    <i class="fa-solid fa-cube text-emerald-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-emerald-400" id="val-cpu-mc">0 %</div>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div id="bar-cpu-mc" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-4 space-y-2">
+                <div class="text-slate-400 flex items-center justify-between">
+                    <span>RAM MACHINE</span>
+                    <i class="fa-solid fa-memory text-slate-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-slate-100" id="val-ram-machine">0 / 0 Go</div>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div id="bar-ram-machine" class="bg-purple-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-4 space-y-2">
+                <div class="text-slate-400 flex items-center justify-between">
+                    <span>RAM MINECRAFT (JVM)</span>
+                    <i class="fa-solid fa-gauge-high text-cyan-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-cyan-400" id="val-ram-mc">0 Mo</div>
+                <div class="text-[11px] text-slate-500">Consommation résidente (RSS)</div>
+            </div>
+        </div>
+
+        <!-- GRAPHIQUES HISTORIQUES -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-5 flex flex-col">
+                <div class="font-mono text-xs font-bold text-slate-200 mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-area text-cyan-400"></i>
+                    <span>CHARGE PROCESSEUR (%) - HISTORIQUE</span>
+                </div>
+                <div class="flex-1 min-h-[260px]">
+                    <canvas id="chart-cpu"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-5 flex flex-col">
+                <div class="font-mono text-xs font-bold text-slate-200 mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-area text-purple-400"></i>
+                    <span>MÉMOIRE VIVE ALLOUÉE (GO / MO)</span>
+                </div>
+                <div class="flex-1 min-h-[260px]">
+                    <canvas id="chart-ram"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const ctxCpu = document.getElementById('chart-cpu').getContext('2d');
+        const ctxRam = document.getElementById('chart-ram').getContext('2d');
+
+        const maxPoints = 30;
+        const labels = Array(maxPoints).fill('');
+
+        const chartCpu = new Chart(ctxCpu, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'PC Hôte (%)',
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        data: Array(maxPoints).fill(0),
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Minecraft (%)',
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        data: Array(maxPoints).fill(0),
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 0, max: 100, grid: { color: '#1e293b' } },
+                    x: { grid: { display: false } }
+                },
+                plugins: { legend: { labels: { color: '#94a3b8' } } }
+            }
+        });
+
+        const chartRam = new Chart(ctxRam, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'RAM Hôte (%)',
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        data: Array(maxPoints).fill(0),
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 0, max: 100, grid: { color: '#1e293b' } },
+                    x: { grid: { display: false } }
+                },
+                plugins: { legend: { labels: { color: '#94a3b8' } } }
+            }
+        });
+
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const telemWs = new WebSocket(`${wsProtocol}//${window.location.host}/ws/telemetry`);
+
+        telemWs.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            document.getElementById('val-cpu-machine').textContent = `${data.cpu} %`;
+            document.getElementById('bar-cpu-machine').style.width = `${data.cpu}%`;
+
+            document.getElementById('val-cpu-mc').textContent = `${data.mc_cpu} %`;
+            document.getElementById('bar-cpu-mc').style.width = `${Math.min(data.mc_cpu, 100)}%`;
+
+            document.getElementById('val-ram-machine').textContent = `${data.ram_used_gb} / ${data.ram_total_gb} Go`;
+            document.getElementById('bar-ram-machine').style.width = `${data.ram_total_percent}%`;
+
+            document.getElementById('val-ram-mc').textContent = `${data.mc_ram_mb} Mo`;
+
+            const mcBadge = document.getElementById('badge-mc');
+            const mcTxt = document.getElementById('txt-mc');
+            if (data.mc_running) {
+                mcBadge.className = "h-2 w-2 rounded-full bg-emerald-500";
+                mcTxt.textContent = "ONLINE";
+                mcTxt.className = "text-emerald-400 font-bold";
+            } else {
+                mcBadge.className = "h-2 w-2 rounded-full bg-red-500";
+                mcTxt.textContent = "OFFLINE";
+                mcTxt.className = "text-red-400 font-bold";
+            }
+
+            chartCpu.data.datasets[0].data.shift();
+            chartCpu.data.datasets[0].data.push(data.cpu);
+            chartCpu.data.datasets[1].data.shift();
+            chartCpu.data.datasets[1].data.push(data.mc_cpu);
+            chartCpu.update('none');
+
+            chartRam.data.datasets[0].data.shift();
+            chartRam.data.datasets[0].data.push(data.ram_total_percent);
+            chartRam.update('none');
+        };
+    </script>
+</body>
+</html>
