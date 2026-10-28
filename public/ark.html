@@ -78,6 +78,10 @@
         <div class="flex flex-wrap items-center justify-between border-b border-slate-800 pb-3 gap-3">
             <div id="server-tabs" class="flex flex-wrap items-center gap-2"></div>
             <div class="flex items-center space-x-2">
+                <button onclick="openCreateArkModal()" class="bg-amber-600 hover:bg-amber-500 text-white font-mono text-xs px-3.5 py-2 rounded border border-amber-500 flex items-center space-x-1.5 font-bold transition-all glow-amber">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>CRÉER UN SERVEUR ARK</span>
+                </button>
                 <button onclick="openImportArkModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs px-3.5 py-2 rounded border border-slate-700 flex items-center space-x-1.5 font-bold transition-all">
                     <i class="fa-solid fa-folder-open text-amber-400"></i>
                     <span>IMPORTER UN SERVEUR ARK</span>
@@ -267,7 +271,7 @@
 
                 <div class="p-3 rounded bg-amber-950/30 border border-amber-800/40 text-amber-200/90 text-[11px] leading-relaxed">
                     <i class="fa-solid fa-circle-info mr-1"></i>
-                    Le panel ne télécharge pas ARK. Importe un dossier déjà installé (SteamCMD ou copie manuelle). Le RCON doit être activé côté serveur : <span class="font-bold">RCONEnabled=True</span> et le même mot de passe que ci-dessus.
+                    Le panel ne télécharge pas ARK dans ce formulaire : il importe un dossier déjà installé (SteamCMD ou copie manuelle). Pour créer un nouveau serveur, utilise « Créer un serveur ARK ». Le RCON doit être activé côté serveur : <span class="font-bold">RCONEnabled=True</span> et le même mot de passe que ci-dessus.
                 </div>
 
                 <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
@@ -275,6 +279,112 @@
                     <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded flex items-center space-x-1.5">
                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
                         <span>Enregistrer le serveur</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE : CRÉER UN SERVEUR ARK VIA STEAMCMD -->
+    <div id="create-ark-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#0f172a] border border-slate-800 rounded-lg max-w-2xl w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto terminal-scroll">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2 font-mono text-sm font-bold text-slate-100">
+                    <i class="fa-solid fa-plus text-amber-400"></i>
+                    <span>CRÉER UN SERVEUR ARK</span>
+                </div>
+                <button onclick="closeCreateArkModal()" class="text-slate-500 hover:text-slate-300">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="create-ark-form" onsubmit="handleCreateArkSubmit(event)" class="space-y-4 font-mono text-xs">
+                <div id="create-ark-fields" class="space-y-4">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Nom du serveur :</label>
+                        <input id="create-ark-name" required type="text" placeholder="Ex: ARK Île PvE" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Édition :</label>
+                            <select id="create-ark-edition" onchange="populateArkMaps()" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500 cursor-pointer">
+                                <option value="ase">ARK: Survival Evolved</option>
+                                <option value="asa">ARK: Survival Ascended</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Map :</label>
+                            <select id="create-ark-map" required class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500 cursor-pointer">
+                                <option value="">Chargement...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <span id="create-ark-map-note" class="block text-[10px] text-slate-500"></span>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Port de jeu :</label>
+                            <input id="create-ark-game-port" type="number" min="1" max="65535" placeholder="auto" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Port Query :</label>
+                            <input id="create-ark-query-port" type="number" min="1" max="65535" placeholder="auto" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Port RCON :</label>
+                            <input id="create-ark-rcon-port" type="number" min="1" max="65535" placeholder="auto" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                    <span class="block text-[10px] text-slate-500">Laisse vide pour une attribution automatique (7777 / 27015 / 27020).</span>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Joueurs max :</label>
+                            <input id="create-ark-max-players" type="number" min="1" max="200" value="70" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Mot de passe admin :</label>
+                            <input id="create-ark-admin-pass" type="text" placeholder="optionnel" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Mot de passe RCON :</label>
+                            <input id="create-ark-rcon-pass" type="text" value="nexus_secret_pwd" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3 p-3 rounded bg-[#060911] border border-slate-800">
+                        <div class="flex items-center space-x-2 text-[11px] text-slate-400 min-w-0">
+                            <i id="ark-steamcmd-icon" class="fa-solid fa-spinner animate-spin text-slate-500"></i>
+                            <span id="ark-steamcmd-text" class="truncate">Vérification de SteamCMD...</span>
+                        </div>
+                        <button id="btn-install-steamcmd" type="button" onclick="installSteamcmd()" class="hidden shrink-0 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-700/50 rounded font-bold">
+                            Installer SteamCMD
+                        </button>
+                    </div>
+
+                    <div class="p-3 rounded bg-amber-950/30 border border-amber-800/40 text-amber-200/90 text-[11px] leading-relaxed">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        Aucune map n'est stockée par le panel : SteamCMD télécharge l'application serveur (maps comprises) au moment de la création. Compte plusieurs Go, l'installation continue en arrière-plan même si tu fermes cette fenêtre.
+                    </div>
+                </div>
+
+                <div id="create-ark-progress" class="hidden space-y-3">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span id="create-ark-stage" class="text-amber-300">Préparation...</span>
+                        <span id="create-ark-percent" class="text-slate-300 font-bold">0 %</span>
+                    </div>
+                    <div class="h-2 w-full bg-slate-800 rounded overflow-hidden">
+                        <div id="create-ark-bar" class="h-full bg-amber-500 transition-all" style="width:0%"></div>
+                    </div>
+                    <pre id="create-ark-log" class="h-56 bg-[#060911] border border-slate-900 rounded p-3 text-[10px] overflow-y-auto terminal-scroll text-slate-400 whitespace-pre-wrap"></pre>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeCreateArkModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded">Fermer</button>
+                    <button id="btn-create-ark" type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded flex items-center space-x-1.5">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Créer & installer</span>
                     </button>
                 </div>
             </form>
@@ -325,7 +435,7 @@
                         connectLogsWs(activeServerId);
                     } else {
                         if (logsWs) { logsWs.close(); logsWs = null; }
-                        document.getElementById('console-output').innerHTML = '<div class="text-slate-600">Aucun serveur ARK configuré. Cliquez sur « Importer un serveur ARK ».</div>';
+                        document.getElementById('console-output').innerHTML = '<div class="text-slate-600">Aucun serveur ARK configuré. Cliquez sur « Créer un serveur ARK » ou « Importer un serveur ARK ».</div>';
                     }
                     connectTelemetryWs();
                 }
@@ -415,6 +525,223 @@
             const m = document.getElementById('import-ark-modal');
             m.classList.add('hidden');
             m.classList.remove('flex');
+        }
+
+        // --- CRÉATION D'UN SERVEUR ARK VIA STEAMCMD ---
+        let arkCatalog = null;
+        let arkJobTimer = null;
+
+        async function openCreateArkModal() {
+            const m = document.getElementById('create-ark-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            document.getElementById('create-ark-progress').classList.add('hidden');
+            document.getElementById('create-ark-fields').classList.remove('hidden');
+            document.getElementById('btn-create-ark').disabled = false;
+
+            if (!arkCatalog) {
+                await loadArkCatalog();
+            }
+
+            try {
+                const data = await (await fetch('/api/ark/install/status')).json();
+                const job = data.job;
+                if (job && (job.state === 'queued' || job.state === 'running')) {
+                    watchArkJob(job);
+                }
+            } catch (e) { /* pas de job en cours */ }
+        }
+
+        function closeCreateArkModal() {
+            const m = document.getElementById('create-ark-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            if (arkJobTimer) {
+                clearInterval(arkJobTimer);
+                arkJobTimer = null;
+            }
+        }
+
+        async function loadArkCatalog() {
+            const icon = document.getElementById('ark-steamcmd-icon');
+            const text = document.getElementById('ark-steamcmd-text');
+            try {
+                const res = await fetch('/api/ark/editions');
+                arkCatalog = await res.json();
+                renderSteamcmdState(arkCatalog.steamcmd);
+                populateArkMaps();
+            } catch (err) {
+                icon.className = 'fa-solid fa-triangle-exclamation text-red-400';
+                text.textContent = `API Steam injoignable : ${err.message}`;
+            }
+        }
+
+        function renderSteamcmdState(state) {
+            const icon = document.getElementById('ark-steamcmd-icon');
+            const text = document.getElementById('ark-steamcmd-text');
+            const btn = document.getElementById('btn-install-steamcmd');
+
+            if (state && state.installed) {
+                icon.className = 'fa-solid fa-circle-check text-emerald-400';
+                text.textContent = `SteamCMD détecté : ${state.path}`;
+                text.title = state.path;
+                btn.classList.add('hidden');
+            } else {
+                icon.className = 'fa-solid fa-triangle-exclamation text-amber-400';
+                text.textContent = "SteamCMD absent : installe-le avant de créer un serveur.";
+                text.title = "";
+                btn.classList.remove('hidden');
+            }
+        }
+
+        function populateArkMaps() {
+            if (!arkCatalog) return;
+            const editionKey = document.getElementById('create-ark-edition').value;
+            const edition = (arkCatalog.editions || []).find(e => e.key === editionKey);
+            const select = document.getElementById('create-ark-map');
+            select.innerHTML = '';
+
+            (edition ? edition.maps : []).forEach(m => {
+                const option = document.createElement('option');
+                option.value = m.id;
+                option.textContent = m.label;
+                select.appendChild(option);
+            });
+
+            if (edition) {
+                select.value = edition.default_map;
+            }
+
+            const note = document.getElementById('create-ark-map-note');
+            note.textContent = edition ? edition.message : "";
+        }
+
+        function showArkJob(job) {
+            document.getElementById('create-ark-fields').classList.add('hidden');
+            document.getElementById('create-ark-progress').classList.remove('hidden');
+            updateArkJob(job);
+        }
+
+        function updateArkJob(job) {
+            if (!job) return;
+            const percent = Math.max(0, Math.min(100, job.progress || 0));
+            document.getElementById('create-ark-stage').textContent = job.stage || job.state || "";
+            document.getElementById('create-ark-percent').textContent = `${percent} %`;
+            document.getElementById('create-ark-bar').style.width = `${percent}%`;
+
+            const log = document.getElementById('create-ark-log');
+            log.textContent = (job.lines || []).join('\n');
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function startArkPolling(jobId, onFinished) {
+            if (arkJobTimer) clearInterval(arkJobTimer);
+
+            const tick = async () => {
+                try {
+                    const res = await fetch(`/api/ark/install/status?job_id=${encodeURIComponent(jobId)}`);
+                    const data = await res.json();
+                    const job = data.job;
+                    if (!job) return;
+                    updateArkJob(job);
+                    if ((job.state === 'done' || job.state === 'error') && onFinished) {
+                        clearInterval(arkJobTimer);
+                        arkJobTimer = null;
+                        onFinished(job);
+                    }
+                } catch (err) {
+                    // Réseau momentanément indisponible : on garde la dernière valeur affichée.
+                }
+            };
+
+            tick();
+            arkJobTimer = setInterval(tick, 2500);
+        }
+
+        function watchArkJob(job) {
+            showArkJob(job);
+            startArkPolling(job.id, async (finished) => {
+                const createBtn = document.getElementById('btn-create-ark');
+                const steamBtn = document.getElementById('btn-install-steamcmd');
+
+                if (finished.state === 'done') {
+                    if (finished.kind === 'server') {
+                        alert(`Serveur ARK [${finished.name}] installé et enregistré.`);
+                        closeCreateArkModal();
+                        activeServerId = finished.server_id;
+                        localStorage.setItem('goat_active_ark_server', activeServerId);
+                        await loadServers();
+                    } else {
+                        document.getElementById('create-ark-progress').classList.add('hidden');
+                        document.getElementById('create-ark-fields').classList.remove('hidden');
+                        if (steamBtn) steamBtn.disabled = false;
+                        await loadArkCatalog();
+                    }
+                    return;
+                }
+
+                alert(`Installation interrompue : ${finished.error || 'erreur inconnue'}`);
+                document.getElementById('create-ark-fields').classList.remove('hidden');
+                createBtn.disabled = false;
+                if (steamBtn) steamBtn.disabled = false;
+            });
+        }
+
+        async function installSteamcmd() {
+            const btn = document.getElementById('btn-install-steamcmd');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/ark/steamcmd/install', { method: 'POST' });
+                const data = await res.json();
+                if (data.status !== 'ok') {
+                    alert(data.message || "Impossible de lancer l'installation de SteamCMD.");
+                    btn.disabled = false;
+                    return;
+                }
+                watchArkJob(data.job);
+            } catch (err) {
+                alert(`Erreur réseau : ${err.message}`);
+                btn.disabled = false;
+            }
+        }
+
+        async function handleCreateArkSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-create-ark');
+            btn.disabled = true;
+
+            const portValue = (id) => parseInt(document.getElementById(id).value, 10) || 0;
+            const payload = {
+                name: document.getElementById('create-ark-name').value.trim(),
+                edition: document.getElementById('create-ark-edition').value,
+                map: document.getElementById('create-ark-map').value,
+                server_port: portValue('create-ark-game-port'),
+                query_port: portValue('create-ark-query-port'),
+                rcon_port: portValue('create-ark-rcon-port'),
+                rcon_pass: document.getElementById('create-ark-rcon-pass').value.trim(),
+                admin_pass: document.getElementById('create-ark-admin-pass').value.trim(),
+                max_players: portValue('create-ark-max-players') || 70
+            };
+
+            try {
+                const res = await fetch('/api/ark/servers/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.status !== 'ok') {
+                    alert(data.message || "Erreur lors de la création du serveur.");
+                    btn.disabled = false;
+                    return;
+                }
+
+                watchArkJob(data.job);
+            } catch (err) {
+                alert(`Erreur réseau : ${err.message}`);
+                btn.disabled = false;
+            }
         }
 
         async function handleImportArkSubmit(e) {

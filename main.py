@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from mcrcon import MCRcon
 
+import ark_installer
 import config
 import mc_installer
 import security
@@ -261,7 +262,7 @@ def server_process(server_dir: str, game: str = "minecraft", scanned=None):
 
 
 def public_server(srv: dict, scanned=None) -> dict:
-    data = {k: v for k, v in srv.items() if k != "rcon_pass"}
+    data = {k: v for k, v in srv.items() if k not in ("rcon_pass", "admin_pass")}
     server_dir = srv.get("server_dir") or ""
     game = srv.get("game", "minecraft")
     scanned = scanned or scan_server_processes()
@@ -271,6 +272,7 @@ def public_server(srv: dict, scanned=None) -> dict:
     else:
         data["status"] = "online" if is_up else "stopped"
     data["has_rcon_pass"] = bool(srv.get("rcon_pass"))
+    data["has_admin_pass"] = bool(srv.get("admin_pass"))
     data["game"] = game
     return data
 
@@ -431,6 +433,9 @@ def load_servers():
     if os.path.exists(SERVERS_DIR):
         for entry in os.scandir(SERVERS_DIR):
             if entry.is_dir():
+                # Installation SteamCMD en cours : le serveur n'est pas encore déclaré.
+                if os.path.exists(os.path.join(entry.path, ark_installer.INSTALL_MARKER)):
+                    continue
                 srv_id = f"srv-{entry.name}"
                 existing = next((s for s in servers if s.get("id") == srv_id), None)
                 if not existing:
@@ -545,6 +550,18 @@ class ArkImportPayload(BaseModel):
     query_port: int = 27015
     rcon_port: int = 27020
     rcon_pass: str = "nexus_pass"
+
+
+class ArkCreatePayload(BaseModel):
+    name: str
+    edition: str = "ase"
+    map: str = "TheIsland"
+    server_port: int = 0
+    query_port: int = 0
+    rcon_port: int = 0
+    rcon_pass: str = "nexus_pass"
+    admin_pass: str = ""
+    max_players: int = 70
 
 
 class PropertiesSavePayload(BaseModel):
@@ -753,6 +770,192 @@ def import_ark_server(payload: ArkImportPayload):
         save_servers(servers_db)
 
     return {"status": "ok", "server": public_server(new_srv)}
+
+
+# --- 1bis. CRÉATION D'UN SERVEUR ARK (STEAMCMD + API STEAM) ---
+def _listening_ports():
+    ports = set()
+    try:
+        for conn in psutil.net_connections(kind="inet"):
+            if conn.status == psutil.CONN_LISTEN and conn.laddr:
+                ports.add(int(conn.laddr.port))
+    except Exception:
+        pass
+    return ports
+
+
+def allocate_ark_ports():
+    """Trio (jeu, query, RCON) libre pour un nouveau serveur ARK."""
+    with _servers_lock:
+        taken = set()
+        for s in servers_db:
+            if s.get("game") != "ark":
+                continue
+            for key in ("server_port", "query_port", "rcon_port"):
+                try:
+                    taken.add(int(s.get(key)))
+                except (TypeError, ValueError):
+                    continue
+    busy = taken | _listening_ports()
+    offset = 0
+    while offset < 2000:
+        trio = (7777 + offset, 27015 + offset, 27020 + offset)
+        if not busy.intersection(trio):
+            return trio
+        offset += 1
+    raise RuntimeError("Aucun port ARK libre trouvé.")
+
+
+@app.get("/api/ark/editions")
+async def get_ark_editions():
+    return await ark_installer.editions_payload()
+
+
+@app.post("/api/ark/steamcmd/install")
+def install_steamcmd_api():
+    job, error = ark_installer.start_steamcmd_job()
+    if error:
+        return {"status": "error", "message": error}
+    return {"status": "ok", "job": ark_installer.public_job(job)}
+
+
+@app.get("/api/ark/install/status")
+def ark_install_status(job_id: str = ""):
+    return {"status": "ok", "job": ark_installer.get_status(job_id)}
+
+
+@app.post("/api/ark/servers/create")
+async def create_ark_server(payload: ArkCreatePayload):
+    global servers_db
+    name = (payload.name or "").strip()
+    if not name or len(name) > 64 or "\n" in name or "\r" in name:
+        return {"status": "error", "message": "Nom de serveur invalide (1 à 64 caractères, sans retour à la ligne)."}
+
+    edition = (payload.edition or "").strip().lower()
+    if edition not in ark_installer.EDITIONS:
+        return {"status": "error", "message": "Édition ARK inconnue : choisis ASE ou ASA."}
+
+    map_id = (payload.map or "").strip()
+    if not re.match(r"^[A-Za-z0-9_\-\.]{1,64}$", map_id):
+        return {"status": "error", "message": "Nom de map invalide (exemple : TheIsland, TheIsland_WP)."}
+
+    if not (4 <= len(payload.rcon_pass) <= 64) or "\r" in payload.rcon_pass or "\n" in payload.rcon_pass:
+        return {"status": "error", "message": "Mot de passe RCON invalide (4 à 64 caractères)."}
+    if len(payload.admin_pass) > 64 or "\r" in payload.admin_pass or "\n" in payload.admin_pass:
+        return {"status": "error", "message": "Mot de passe admin invalide (64 caractères maximum)."}
+    if not (1 <= int(payload.max_players) <= 200):
+        return {"status": "error", "message": "Nombre de joueurs invalide (1 à 200)."}
+
+    requested = (payload.server_port, payload.query_port, payload.rcon_port)
+    if any(requested):
+        if not all(requested):
+            return {"status": "error", "message": "Renseigne les trois ports, ou laisse les trois vides pour un choix automatique."}
+        for label, port in zip(("jeu", "query", "RCON"), requested):
+            if not (1 <= int(port) <= 65535):
+                return {"status": "error", "message": f"Port {label} invalide."}
+        if len({int(p) for p in requested}) != 3:
+            return {"status": "error", "message": "Les ports jeu, query et RCON doivent être différents."}
+        busy = _listening_ports()
+        with _servers_lock:
+            for s in servers_db:
+                if s.get("game") == "ark":
+                    for key in ("server_port", "query_port", "rcon_port"):
+                        try:
+                            busy.add(int(s.get(key)))
+                        except (TypeError, ValueError):
+                            continue
+        clash = sorted({int(p) for p in requested}.intersection(busy))
+        if clash:
+            return {
+                "status": "error",
+                "message": f"Port(s) déjà utilisé(s) : {', '.join(str(p) for p in clash)}. Laisse les champs vides pour un choix automatique.",
+            }
+        server_port, query_port, rcon_port = (int(p) for p in requested)
+    else:
+        try:
+            server_port, query_port, rcon_port = allocate_ark_ports()
+        except RuntimeError as exc:
+            return {"status": "error", "message": str(exc)}
+
+    folder_name = "ark_" + re.sub(r'[^a-zA-Z0-9_\-]', '_', name.lower())
+    srv_id = f"srv-{folder_name}"
+    server_path = os.path.abspath(os.path.join(SERVERS_DIR, folder_name))
+
+    with _servers_lock:
+        servers_db = load_servers()
+        if any(s.get("id") == srv_id for s in servers_db):
+            return {"status": "error", "message": f"Un serveur ARK nommé {name} existe déjà."}
+        if any(os.path.abspath(s.get("server_dir", "")) == server_path for s in servers_db):
+            return {"status": "error", "message": "Ce dossier de serveur est déjà enregistré dans le panel."}
+        if os.path.isdir(server_path) and os.listdir(server_path):
+            if not os.path.exists(os.path.join(server_path, ark_installer.INSTALL_MARKER)):
+                return {"status": "error", "message": f"Le dossier {server_path} existe déjà et n'est pas vide."}
+
+    app_ids, app_labels, warnings = await ark_installer.resolve_map_apps(edition, map_id)
+
+    new_srv = {
+        "id": srv_id,
+        "name": name,
+        "game": "ark",
+        "loader": "ark",
+        "edition": edition,
+        "map": map_id,
+        "server_port": server_port,
+        "query_port": query_port,
+        "rcon_host": "127.0.0.1",
+        "rcon_port": rcon_port,
+        "rcon_pass": payload.rcon_pass,
+        "admin_pass": payload.admin_pass,
+        "max_players": int(payload.max_players),
+        "server_dir": server_path,
+        "ram_max": "",
+    }
+
+    def _register(job):
+        global servers_db
+        with _servers_lock:
+            current = load_servers()
+            current = [s for s in current if s.get("id") != srv_id]
+            current.append(dict(new_srv))
+            save_servers(current)
+            servers_db = current
+
+    params = {
+        "name": name,
+        "edition": edition,
+        "map": map_id,
+        "server_port": server_port,
+        "query_port": query_port,
+        "rcon_port": rcon_port,
+        "rcon_pass": payload.rcon_pass,
+        "admin_pass": payload.admin_pass,
+        "max_players": int(payload.max_players),
+        "server_dir": server_path,
+        "server_id": srv_id,
+        "app_ids": app_ids,
+        "app_labels": app_labels,
+        "warnings": warnings,
+    }
+
+    job, error = ark_installer.start_server_job(params, _register)
+    if error:
+        return {"status": "error", "message": error}
+
+    return {
+        "status": "ok",
+        "message": f"Installation de {name} lancée : SteamCMD télécharge {len(app_ids)} application(s).",
+        "job": ark_installer.public_job(job),
+        "preview": {
+            "id": srv_id,
+            "name": name,
+            "edition": edition,
+            "map": map_id,
+            "server_port": server_port,
+            "query_port": query_port,
+            "rcon_port": rcon_port,
+            "server_dir": server_path,
+        },
+    }
 
 
 @app.delete("/api/mc/servers/{server_id}")

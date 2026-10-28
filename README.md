@@ -16,7 +16,7 @@ GOAT est un outil local d'administration et de supervision système conçu pour 
 - **Déploiement en 1 clic :** téléchargement automatisé des versions et chargeurs avec validation automatique de l'EULA.
 - **Importation simple :** prise en charge des serveurs moddés existants via chemin absolu.
 - **Console temps réel :** streaming des logs JVM via WebSocket et terminal de commandes RCON interactif.
-- **Serveurs ARK :** import de serveurs ASE/ASA existants, lancement par `.bat`, console RCON (`SaveWorld`, `DoExit`) et logs `ShooterGame.log` en direct.
+- **Serveurs ARK :** création automatique via SteamCMD (sans stocker de map), import de serveurs ASE/ASA existants, lancement par `.bat` ou exécutable, console RCON (`SaveWorld`, `DoExit`) et logs `ShooterGame.log` en direct.
 - **Éditeur de configuration :** modification directe de `server.properties` avec recherche intégrée.
 - **Supervision système :** métriques CPU/RAM de l'hôte vs processus Java en direct.
 - **Python Toolbox :** exécution des scripts de `scripts/` depuis l'interface (stdout/stderr, code de sortie), inventaire de dossiers et sauvegardes horodatées du dossier `world`.
@@ -68,8 +68,9 @@ accessible depuis les autres appareils du réseau.
 - Session sans état : cookie `HttpOnly` signé HMAC-SHA256, valable 7 jours.
 - Limitation des tentatives de connexion (10 essais / 5 minutes / IP).
 - Vérification d'origine sur les requêtes mutantes et les WebSockets (anti-CSRF).
-- Le mot de passe RCON n'est jamais renvoyé par l'API : `GET /api/mc/servers` et
-  `GET /api/ark/servers` l'occultent (seul `has_rcon_pass` est exposé).
+- Les mots de passe RCON et admin ne sont jamais renvoyés par l'API :
+  `GET /api/mc/servers` et `GET /api/ark/servers` les occultent (seuls
+  `has_rcon_pass` et `has_admin_pass` sont exposés).
 - Suppression disque limitée au dossier `servers/` : un serveur importé ailleurs est
   retiré du panel mais ses fichiers ne sont jamais effacés.
 - `servers.json` est écrit de façon atomique (fichier temporaire + `os.replace`).
@@ -98,9 +99,22 @@ touchée.
 
 ## 🦖 Serveurs ARK (ASE / ASA)
 
-L'onglet **ARK** (`/ark.html`) gère des installations ARK: Survival Evolved et ARK:
-Survival Ascended **déjà présentes sur le disque** : le panel ne télécharge pas ARK.
+L'onglet **ARK** (`/ark.html`) gère ARK: Survival Evolved (ASE) et ARK: Survival
+Ascended (ASA) : création automatique via SteamCMD, ou import d'une installation
+déjà présente sur le disque.
 
+- **Création :** `POST /api/ark/servers/create` valide le nom, l'édition, la map et les
+  ports (champs vides = attribution automatique), puis lance SteamCMD en arrière-plan
+  (`+login anonymous +app_update <app> validate`). Le panel ne stocke **aucune map** :
+  les cartes sont téléchargées avec l'app serveur Steam (`376030` pour ASE, `2430930`
+  pour ASA). L'avancement se suit avec `GET /api/ark/install/status?job_id=...` et
+  s'écrit dans `logs/ark-server-<job>.log`.
+- **SteamCMD :** `GET /api/ark/editions` renvoie les éditions, les maps disponibles et
+  l'état de SteamCMD. `POST /api/ark/steamcmd/install` le télécharge dans
+  `tools/steamcmd/` (ignoré par git) si `steamcmd.exe` n'est pas déjà dans le `PATH`.
+- **Pendant l'installation :** le dossier porte un marqueur `.goat-installing` et reste
+  masqué dans la liste. À la fin, le serveur apparaît avec `GameUserSettings.ini` déjà
+  écrit (session, ports, RCON, mot de passe admin, nombre de joueurs).
 - **Import :** indique le dossier racine du serveur (celui qui contient `ShooterGame`,
   un lanceur `.bat` ou `ShooterGame/Binaries/Win64/ArkAscendedServer.exe`).
 - **Lancement :** priorité au premier `.bat` trouvé (`start_ark.bat`, `ark.bat`,
