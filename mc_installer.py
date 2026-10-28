@@ -129,7 +129,7 @@ motd=Nexus Managed Server
     # 4. Fichier user_jvm_args.txt pour Forge / NeoForge modernes
     user_jvm_path = os.path.join(server_dir, "user_jvm_args.txt")
     with open(user_jvm_path, "w", encoding="utf-8") as f:
-        f.write(f"# Paramètres de mémoire gérés par Nexus Panel\n-Xms2G\n-Xmx{ram_max}\n")
+        f.write(f"# Paramètres de mémoire gérés par Nexus Panel\n-Xmx{ram_max}\n")
 
     # 5. Téléchargement et génération du lanceur .bat
     async with httpx.AsyncClient(timeout=120.0, follow_redirects=True) as client:
@@ -151,7 +151,7 @@ motd=Nexus Managed Server
                         f.write(chunk)
 
             with open(os.path.join(server_dir, "run.bat"), "w", encoding="utf-8") as f:
-                f.write(f"@echo off\njava -Xms2G -Xmx{ram_max} -jar server.jar nogui\npause\n")
+                f.write(f"@echo off\njava -Xmx{ram_max} -jar server.jar nogui\npause\n")
 
         elif loader == "neoforge":
             clean_version = version.strip()
@@ -165,18 +165,23 @@ motd=Nexus Managed Server
                     async for chunk in stream.aiter_bytes():
                         f.write(chunk)
 
-            with open(os.path.join(server_dir, "run.bat"), "w", encoding="utf-8") as f:
+            # Lanceur dedie : installe une seule fois, puis delegue au run.bat genere
+            # par NeoForge. Ne jamais appeler ce fichier lui-meme (boucle infinie).
+            with open(os.path.join(server_dir, "goat_launch.bat"), "w", encoding="utf-8") as f:
                 f.write(f"""@echo off
-if not exist "run.bat.installed" (
-    echo [Nexus] Installation silencieuse de NeoForge en cours...
-    java -jar neoforge-installer.jar --installServer
-    type nul > "run.bat.installed"
-)
-if exist "run.bat" (
-    call run.bat
-) else (
-    java -Xms2G -Xmx{ram_max} -jar server.jar nogui
-)
+cd /d "%~dp0"
+if exist "neoforge-installed.txt" goto run
+echo [GOAT] Installation silencieuse de NeoForge en cours...
+java -jar neoforge-installer.jar --installServer
+if errorlevel 1 goto jar
+type nul > "neoforge-installed.txt"
+:run
+if not exist "run.bat" goto jar
+call run.bat
+goto end
+:jar
+java -Xmx{ram_max} -jar server.jar nogui
+:end
 pause
 """)
 
@@ -197,18 +202,21 @@ pause
                     async for chunk in stream.aiter_bytes():
                         f.write(chunk)
 
-            with open(os.path.join(server_dir, "run.bat"), "w", encoding="utf-8") as f:
+            with open(os.path.join(server_dir, "goat_launch.bat"), "w", encoding="utf-8") as f:
                 f.write(f"""@echo off
-if not exist "forge-installed.txt" (
-    echo [Nexus] Installation silencieuse de Forge en cours...
-    java -jar forge-installer.jar --installServer
-    type nul > "forge-installed.txt"
-)
-if exist "run.bat" (
-    call run.bat
-) else (
-    java -Xms2G -Xmx{ram_max} -jar server.jar nogui
-)
+cd /d "%~dp0"
+if exist "forge-installed.txt" goto run
+echo [GOAT] Installation silencieuse de Forge en cours...
+java -jar forge-installer.jar --installServer
+if errorlevel 1 goto jar
+type nul > "forge-installed.txt"
+:run
+if not exist "run.bat" goto jar
+call run.bat
+goto end
+:jar
+java -Xmx{ram_max} -jar server.jar nogui
+:end
 pause
 """)
 
@@ -221,4 +229,4 @@ pause
                         f.write(chunk)
                         
             with open(os.path.join(server_dir, "run.bat"), "w", encoding="utf-8") as f:
-                f.write(f"@echo off\njava -Xms2G -Xmx{ram_max} -jar server.jar nogui\npause\n")
+                f.write(f"@echo off\njava -Xmx{ram_max} -jar server.jar nogui\npause\n")

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOAT // CONNEXION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #94a3b8; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .grid-bg {
+            background-image:
+                linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+            background-size: 42px 42px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center grid-bg p-6">
+
+    <main class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center space-x-3 mb-2">
+                <span class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-mono font-bold text-2xl tracking-wider text-slate-100">GOAT<span class="text-emerald-500">//</span>CORE</span>
+            </div>
+            <p class="text-xs font-mono text-slate-500 uppercase tracking-widest">Accès local sécurisé</p>
+        </div>
+
+        <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-8 shadow-2xl">
+            <h1 id="title" class="font-mono text-lg font-bold text-slate-100 mb-1">Connexion</h1>
+            <p id="subtitle" class="text-xs text-slate-500 mb-6">Entre le mot de passe du panel pour continuer.</p>
+
+            <form id="auth-form" class="space-y-4" autocomplete="off">
+                <div>
+                    <label for="password" class="block text-xs font-mono text-slate-400 mb-1.5">MOT DE PASSE</label>
+                    <div class="relative">
+                        <input id="password" type="password" required minlength="1" autocomplete="current-password"
+                            class="w-full bg-[#060911] border border-slate-800 rounded px-3.5 py-2.5 text-sm text-slate-200 font-mono focus:outline-none focus:border-emerald-500/70 pr-10"
+                            placeholder="••••••••">
+                        <button type="button" id="toggle-visibility" tabindex="-1"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 px-1">
+                            <i class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="confirm-group" class="hidden">
+                    <label for="confirm" class="block text-xs font-mono text-slate-400 mb-1.5">CONFIRMATION</label>
+                    <input id="confirm" type="password" autocomplete="new-password"
+                        class="w-full bg-[#060911] border border-slate-800 rounded px-3.5 py-2.5 text-sm text-slate-200 font-mono focus:outline-none focus:border-emerald-500/70"
+                        placeholder="••••••••">
+                </div>
+
+                <button id="submit" type="submit"
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm py-2.5 rounded transition-all flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    <span id="submit-label">Se connecter</span>
+                </button>
+            </form>
+
+            <div id="message" class="hidden mt-4 text-xs font-mono px-3 py-2 rounded border"></div>
+
+            <p id="setup-hint" class="hidden mt-6 text-[11px] leading-relaxed text-amber-300/80 bg-amber-950/30 border border-amber-900/40 rounded px-3 py-2">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                Premier démarrage : définis le mot de passe du panel. Il est stocké haché sur cette machine, jamais en clair.
+            </p>
+        </div>
+
+        <p class="text-center text-[11px] font-mono text-slate-600 mt-6">
+            <i class="fa-solid fa-lock mr-1"></i> 100 % local — aucune télémétrie
+        </p>
+    </main>
+
+    <script>
+        const form = document.getElementById('auth-form');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirm');
+        const confirmGroup = document.getElementById('confirm-group');
+        const messageBox = document.getElementById('message');
+        const submitLabel = document.getElementById('submit-label');
+        const title = document.getElementById('title');
+        const subtitle = document.getElementById('subtitle');
+        const setupHint = document.getElementById('setup-hint');
+
+        let setupMode = false;
+
+        const params = new URLSearchParams(window.location.search);
+        const nextParam = params.get('next');
+        const target = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
+            ? nextParam
+            : '/dashboard.html';
+
+        function showMessage(text, kind) {
+            messageBox.textContent = text;
+            messageBox.className = 'mt-4 text-xs font-mono px-3 py-2 rounded border ' + (
+                kind === 'error'
+                    ? 'bg-red-950/40 border-red-900/60 text-red-300'
+                    : 'bg-emerald-950/40 border-emerald-900/60 text-emerald-300'
+            );
+            messageBox.classList.remove('hidden');
+        }
+
+        function enterSetupMode() {
+            setupMode = true;
+            title.textContent = 'Configuration initiale';
+            subtitle.textContent = 'Choisis le mot de passe qui protège le panel.';
+            confirmGroup.classList.remove('hidden');
+            confirmInput.required = true;
+            passwordInput.autocomplete = 'new-password';
+            submitLabel.textContent = 'Créer le mot de passe';
+            setupHint.classList.remove('hidden');
+        }
+
+        document.getElementById('toggle-visibility').addEventListener('click', () => {
+            passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+        });
+
+        (async () => {
+            try {
+                const res = await fetch('/api/auth/status');
+                const status = await res.json();
+                if (status.authenticated) {
+                    window.location.replace(target);
+                    return;
+                }
+                if (!status.setup) {
+                    if (!status.local) {
+                        showMessage("Le panel n'est pas encore configuré. Ouvre-le depuis la machine qui l'héberge.", 'error');
+                        form.querySelectorAll('input, button').forEach(el => el.disabled = true);
+                        return;
+                    }
+                    enterSetupMode();
+                }
+            } catch (err) {
+                showMessage('Impossible de joindre le serveur du panel.', 'error');
+            }
+        })();
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            messageBox.classList.add('hidden');
+
+            const password = passwordInput.value;
+            if (setupMode) {
+                if (password.length < 8) {
+                    showMessage('8 caractères minimum.', 'error');
+                    return;
+                }
+                if (password !== confirmInput.value) {
+                    showMessage('Les deux mots de passe ne correspondent pas.', 'error');
+                    return;
+                }
+            }
+
+            const endpoint = setupMode ? '/api/auth/setup' : '/api/auth/login';
+            const submitBtn = document.getElementById('submit');
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>Connecté</span>';
+                    window.location.replace(target);
+                    return;
+                }
+
+                if (data.code === 'setup_required') {
+                    enterSetupMode();
+                    showMessage('Aucun mot de passe défini : crée-le maintenant.', 'error');
+                } else {
+                    showMessage(data.message || 'Échec de la connexion.', 'error');
+                }
+            } catch (err) {
+                showMessage('Erreur réseau : le panel est-il démarré ?', 'error');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

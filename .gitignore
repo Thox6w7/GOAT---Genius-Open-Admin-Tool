@@ -24,6 +24,11 @@ servers/
 servers.json
 backups/
 
+# Secrets du panel (mot de passe hache + cle de signature des sessions)
+auth.json
+secret.key
+*.tmp
+
 # ========================================================
 # LOGS & FICHIERS TEMPORAIRES
 # ========================================================

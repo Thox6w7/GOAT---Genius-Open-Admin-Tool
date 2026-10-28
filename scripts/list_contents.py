@@ -1,3 +1,11 @@
+"""Affiche le contenu d'un dossier avec tailles et dates de modification.
+
+Usage :
+    python list_contents.py [chemin]
+
+Sans argument, inspecte la racine du panel (dossier courant).
+"""
+
 import sys
 import os
 import argparse

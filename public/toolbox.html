@@ -3,68 +3,873 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOAT // Boîte à Outils</title>
+    <title>GOAT // Python Toolbox</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #94a3b8; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .terminal-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: transparent; }
     </style>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 flex flex-col min-h-screen">
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-slate-300">
 
-    <!-- HEADER DE NAVIGATION -->
-    <header class="border-b border-slate-800 bg-[#0f172a] px-6 py-3.5 flex justify-between items-center shadow-lg">
+    <!-- HEADER DE NAVIGATION GOAT -->
+    <header class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur px-6 py-3 flex items-center justify-between sticky top-0 z-50">
         <div class="flex items-center space-x-3">
-            <span class="text-xl font-black tracking-widest text-amber-400 font-mono">G.O.A.T</span>
-            <span class="text-xs bg-amber-950/80 text-amber-300 font-mono border border-amber-800/80 px-2 py-0.5 rounded uppercase">Pre-Alpha</span>
+            <span class="h-3 w-3 rounded-full bg-amber-500 animate-pulse"></span>
+            <span class="font-mono font-bold text-lg tracking-wider text-slate-100">GOAT<span class="text-amber-500">//</span>OPS</span>
+            <span class="text-xs bg-amber-950/70 text-amber-300 px-2 py-0.5 rounded border border-amber-800/60 font-mono font-bold tracking-wide">PRE-ALPHA</span>
         </div>
-        <nav class="flex items-center space-x-6 text-sm font-semibold">
-            <a href="/" class="text-slate-400 hover:text-amber-400 transition-colors flex items-center space-x-2">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>Vue Générale</span>
-            </a>
-            <a href="/minecraft.html" class="text-slate-400 hover:text-amber-400 transition-colors flex items-center space-x-2">
-                <i class="fa-solid fa-server"></i>
-                <span>Serveurs Minecraft</span>
-            </a>
-            <a href="/toolbox.html" class="text-amber-400 border-b-2 border-amber-400 pb-1 flex items-center space-x-2">
-                <i class="fa-solid fa-toolbox"></i>
-                <span>Boîte à Outils</span>
-            </a>
-        </nav>
+
+        <div class="flex items-center space-x-5 text-xs font-mono">
+            <div class="hidden sm:flex items-center space-x-2 text-slate-400">
+                <i class="fa-solid fa-code text-amber-400"></i>
+                <span id="script-count">0 SCRIPT</span>
+            </div>
+            <button onclick="logout()" title="Se déconnecter" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded font-mono font-bold text-xs flex items-center space-x-2 transition-all">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>QUITTER</span>
+            </button>
+        </div>
     </header>
 
-    <!-- ZONE CENTRALE : MESSAGE EN COURS DE RÉALISATION -->
-    <main class="flex-1 flex items-center justify-center p-6">
-        <div class="bg-[#0f172a] border border-slate-800 rounded-xl p-8 max-w-lg w-full text-center space-y-5 shadow-2xl">
-            <div class="h-16 w-16 mx-auto rounded-xl bg-amber-950/50 border border-amber-600/40 flex items-center justify-center text-amber-400 text-3xl">
-                <i class="fa-solid fa-screwdriver-wrench"></i>
-            </div>
-            
-            <div class="space-y-2">
-                <h1 class="text-2xl font-bold font-mono text-slate-100 tracking-wide">
-                    En cours de réalisation
-                </h1>
-                <p class="text-sm text-slate-400 leading-relaxed">
-                    Le module de boîte à outils et d'utilitaires autonomes est actuellement en restructuration.
-                </p>
-            </div>
+    <!-- BARRE DE NAVIGATION COMMUNE -->
+    <nav class="border-b border-slate-800 bg-[#090d16] px-6 flex space-x-2 font-mono text-xs overflow-x-auto">
+        <a href="/" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-house"></i>
+            <span>ACCUEIL</span>
+        </a>
+        <a href="/minecraft.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-cube text-emerald-400"></i>
+            <span>MINECRAFT</span>
+        </a>
+        <a href="/ark.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-dragon text-amber-400"></i>
+            <span>ARK</span>
+        </a>
+        <a href="/dashboard.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>DASHBOARD METRICS</span>
+        </a>
+        <a href="/toolbox.html" class="py-3 px-4 border-b-2 border-amber-500 text-amber-400 font-bold flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-toolbox"></i>
+            <span>PYTHON TOOLBOX</span>
+        </a>
+        <a href="/guide.html" class="py-3 px-4 border-b-2 border-transparent text-indigo-400 hover:text-indigo-300 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-book-open"></i>
+            <span>GUIDE DÉBUTANT</span>
+        </a>
+    </nav>
 
-            <div class="pt-4 border-t border-slate-800/80 flex justify-center">
-                <a href="/minecraft.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono font-bold rounded border border-slate-700 flex items-center space-x-2 transition-all">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Retour aux serveurs Minecraft</span>
-                </a>
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-1 p-6 space-y-6">
+
+        <!-- TITRE -->
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="h-11 w-11 rounded-lg bg-amber-950/60 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl">
+                    <i class="fa-solid fa-toolbox"></i>
+                </div>
+                <div>
+                    <h1 class="font-mono font-bold text-xl text-slate-100 tracking-wide">PYTHON TOOLBOX</h1>
+                    <p class="text-xs text-slate-400">Exécute les scripts du dossier <code class="font-mono text-amber-300">scripts/</code> et génère des inventaires de dossiers.</p>
+                </div>
+            </div>
+            <div class="font-mono text-[11px] text-slate-500 flex items-center space-x-2">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                <span>Exécution locale, résultat renvoyé dans la console</span>
             </div>
         </div>
+
+        <!-- SCRIPTS + EXÉCUTION -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+            <!-- LISTE DES SCRIPTS -->
+            <section class="xl:col-span-4 bg-[#0f172a] border border-slate-800 rounded-lg p-4 flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2 font-mono text-xs font-bold text-slate-200">
+                        <i class="fa-solid fa-file-code text-amber-400"></i>
+                        <span>SCRIPTS DISPONIBLES</span>
+                    </div>
+                    <button onclick="refreshToolbox()" title="Actualiser les scripts et les dossiers" class="text-slate-500 hover:text-amber-400 transition-colors text-xs font-mono flex items-center space-x-1.5">
+                        <i class="fa-solid fa-rotate" id="refresh-icon"></i>
+                        <span>ACTUALISER</span>
+                    </button>
+                </div>
+                <div id="script-list" class="space-y-2 overflow-y-auto terminal-scroll pr-1 xl:max-h-[520px]">
+                    <div class="text-xs font-mono text-slate-500 p-3 border border-slate-800 rounded bg-[#060911]">
+                        <i class="fa-solid fa-circle-notch fa-spin mr-2 text-amber-400"></i>Chargement des scripts...
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-3 leading-relaxed border-t border-slate-800 pt-3">
+                    Dépose un fichier <code class="font-mono text-slate-400">.py</code> dans
+                    <code class="font-mono text-slate-400">scripts/</code>, puis clique sur
+                    <span class="text-slate-400">Actualiser</span>.
+                </p>
+            </section>
+
+            <!-- EXÉCUTION -->
+            <section class="xl:col-span-8 space-y-6">
+                <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-5">
+                    <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                        <div class="min-w-0">
+                            <div class="flex items-center space-x-2 font-mono text-sm font-bold text-slate-100">
+                                <i class="fa-solid fa-terminal text-amber-400"></i>
+                                <span id="selected-script-name">Aucun script sélectionné</span>
+                            </div>
+                            <p id="selected-script-desc" class="text-xs text-slate-400 mt-1">Sélectionne un script dans la liste de gauche.</p>
+                            <div id="selected-script-meta" class="font-mono text-[11px] text-slate-500 mt-1.5">--</div>
+                        </div>
+                        <button id="run-btn" onclick="runScript()" disabled
+                                class="bg-amber-600 hover:bg-amber-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-mono font-bold text-xs px-4 py-2.5 rounded border border-amber-500/50 disabled:border-slate-700 flex items-center space-x-2 transition-all">
+                            <i id="run-icon" class="fa-solid fa-play"></i>
+                            <span id="run-label">EXÉCUTER</span>
+                        </button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="script-folder" class="block font-mono text-[11px] font-bold text-slate-400 mb-1.5">
+                            DOSSIER <span class="text-slate-600 font-normal">— sélection rapide du premier argument</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-folder-open absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 text-xs pointer-events-none"></i>
+                            <select id="script-folder" onchange="applyScriptFolder(this.value)" disabled
+                                    class="w-full appearance-none bg-[#060911] border border-slate-700 focus:border-amber-500 focus:outline-none rounded pl-9 pr-9 py-2.5 font-mono text-xs text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <option value="">Sélectionne d'abord un script</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none"></i>
+                        </div>
+                        <p id="script-folder-hint" class="text-[11px] text-slate-500 mt-1.5">
+                            Choisis un dossier : il devient le premier argument. Tu peux aussi saisir un chemin manuellement.
+                        </p>
+                    </div>
+
+                    <label for="script-args" class="block font-mono text-[11px] font-bold text-slate-400 mb-1.5">
+                        ARGUMENTS <span class="text-slate-600 font-normal">— un argument par ligne</span>
+                    </label>
+                    <textarea id="script-args" rows="3" spellcheck="false"
+                              placeholder="Exemple :&#10;servers/test_forge/world"
+                              class="w-full bg-[#060911] border border-slate-700 focus:border-amber-500 focus:outline-none rounded p-3 font-mono text-xs text-slate-200 placeholder:text-slate-600 resize-y"></textarea>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mt-2">
+                        <p class="text-[11px] text-slate-500">
+                            Les arguments sont transmis dans l'ordre. <kbd class="font-mono text-slate-400">Ctrl</kbd> + <kbd class="font-mono text-slate-400">Entrée</kbd> pour exécuter.
+                        </p>
+                        <p class="font-mono text-[11px] text-slate-500">Délai maximum : <span class="text-slate-400">5 min</span></p>
+                    </div>
+                </div>
+
+                <!-- CONSOLE -->
+                <div class="bg-[#0f172a] border border-slate-800 rounded-lg p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center space-x-2 font-mono text-xs font-bold text-slate-200">
+                            <span id="run-status-dot" class="h-2 w-2 rounded-full bg-slate-600"></span>
+                            <span>CONSOLE DE SORTIE</span>
+                            <span id="run-status" class="text-slate-500 font-normal">EN ATTENTE</span>
+                            <span id="run-exit-badge" class="hidden px-2 py-0.5 rounded border text-[10px] font-bold"></span>
+                            <span id="run-duration" class="text-slate-600 font-normal"></span>
+                        </div>
+                        <div class="flex items-center space-x-3 text-[11px] font-mono">
+                            <button onclick="copyConsole()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                                <i class="fa-regular fa-copy mr-1"></i>Copier
+                            </button>
+                            <button onclick="clearConsole()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                                <i class="fa-solid fa-eraser mr-1"></i>Effacer
+                            </button>
+                        </div>
+                    </div>
+                    <div id="console-output" class="h-[420px] bg-[#060911] border border-slate-900 rounded p-4 font-mono text-xs overflow-y-auto terminal-scroll text-slate-300 space-y-3">
+                        <div class="text-slate-600">Le résultat du script apparaîtra ici.</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- INVENTAIRE DE DOSSIER -->
+        <section class="bg-[#0f172a] border border-slate-800 rounded-lg p-5">
+            <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div>
+                    <div class="flex items-center space-x-2 font-mono text-sm font-bold text-slate-100">
+                        <i class="fa-solid fa-folder-tree text-cyan-400"></i>
+                        <span>INVENTAIRE DE DOSSIER</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Choisis un dossier dans le menu, ou saisis un chemin relatif au panel
+                        (ex. <code class="font-mono text-slate-300">servers/test_forge</code>) ou absolu.
+                    </p>
+                </div>
+                <span class="font-mono text-[11px] text-slate-500">Limite : 50 000 entrées</span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="relative shrink-0 w-full sm:w-72">
+                    <i class="fa-solid fa-folder-open absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400 text-xs pointer-events-none"></i>
+                    <select id="inventory-folder" onchange="applyInventoryFolder(this.value)"
+                            class="w-full appearance-none bg-[#060911] border border-slate-700 focus:border-cyan-500 focus:outline-none rounded pl-9 pr-9 py-2.5 font-mono text-xs text-slate-200">
+                        <option value="">Choisir un dossier…</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none"></i>
+                </div>
+                <div class="flex-1 min-w-[240px] flex items-center bg-[#060911] border border-slate-700 focus-within:border-cyan-500 rounded">
+                    <i class="fa-solid fa-folder-open text-slate-500 ml-3 text-xs"></i>
+                    <input id="inventory-path" type="text" value="." spellcheck="false"
+                           placeholder="Chemin à inspecter (défaut : .)"
+                           class="flex-1 bg-transparent border-0 focus:outline-none px-3 py-2.5 font-mono text-xs text-slate-200 placeholder:text-slate-600">
+                </div>
+                <button id="inventory-btn" onclick="runInventory(false)"
+                        class="bg-cyan-700 hover:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-mono font-bold text-xs px-4 py-2.5 rounded border border-cyan-500/40 disabled:border-slate-700 flex items-center space-x-2 transition-all">
+                    <i id="inventory-icon" class="fa-solid fa-list"></i>
+                    <span id="inventory-label">GÉNÉRER</span>
+                </button>
+                <button id="inventory-download-btn" onclick="downloadInventory()" disabled
+                        class="bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 font-mono font-bold text-xs px-4 py-2.5 rounded border border-slate-700 flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-download text-cyan-400"></i>
+                    <span>TÉLÉCHARGER</span>
+                </button>
+                <button onclick="copyInventory()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono font-bold text-xs px-4 py-2.5 rounded border border-slate-700 flex items-center space-x-2 transition-all">
+                    <i class="fa-regular fa-copy text-slate-400"></i>
+                    <span>COPIER</span>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between mt-3 mb-1.5">
+                <span id="inventory-status" class="font-mono text-[11px] text-slate-500">Aucun inventaire généré.</span>
+                <span class="font-mono text-[11px] text-slate-600">Sortie : fichier <code>.txt</code></span>
+            </div>
+            <pre id="inventory-output" class="h-64 bg-[#060911] border border-slate-900 rounded p-4 font-mono text-xs overflow-auto terminal-scroll text-slate-300 whitespace-pre">L'inventaire apparaîtra ici.</pre>
+        </section>
     </main>
 
     <!-- FOOTER -->
     <footer class="border-t border-slate-800 bg-[#090d16] py-4 text-center text-xs font-mono text-slate-500">
-        Genius Open Admin Tool (GOAT) — Module Toolbox
+        Genius Open Admin Tool (GOAT) — Python Toolbox
     </footer>
 
+    <!-- NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 z-[100] max-w-[calc(100vw-3rem)] break-words bg-slate-800 border border-slate-600 text-slate-100 font-mono text-xs px-4 py-2.5 rounded shadow-2xl opacity-0 pointer-events-none transition-opacity duration-200">
+        <i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><span id="toast-text"></span>
+    </div>
+
+    <script>
+        // Toute session expirée renvoie vers l'écran de connexion.
+        const _goatFetch = window.fetch.bind(window);
+        window.fetch = async (...args) => {
+            const res = await _goatFetch(...args);
+            if (res.status === 401) {
+                window.location.replace('/login.html?next=' + encodeURIComponent(window.location.pathname));
+            }
+            return res;
+        };
+
+        const state = {
+            scripts: [],
+            selected: null,
+            running: false,
+            lastOutput: '',
+            inventoryUrl: null,
+            inventoryText: '',
+            directoryGroups: []
+        };
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function formatSize(bytes) {
+            if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' Mo';
+            if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' Ko';
+            return bytes + ' o';
+        }
+
+        function formatDate(iso) {
+            const date = new Date(iso);
+            if (isNaN(date.getTime())) return iso;
+            return date.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+        }
+
+        // --- SÉLECTION DES DOSSIERS ---
+        function pathKey(value) {
+            return String(value || '').replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
+        }
+
+        function syncFolderSelectValue(select, value) {
+            const match = Array.from(select.options).find(
+                (option) => option.value && pathKey(option.value) === pathKey(value)
+            );
+            select.value = match ? match.value : '';
+        }
+
+        function fillFolderSelect(select, groups, placeholder, emptyLabel) {
+            const previous = select.value;
+            select.innerHTML = '';
+
+            let count = 0;
+            (groups || []).forEach((group) => {
+                const directories = (group.directories || []).filter((dir) => dir && dir.path);
+                if (!directories.length) return;
+
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = group.label || 'Dossiers';
+                directories.forEach((dir) => {
+                    const option = document.createElement('option');
+                    option.value = dir.path;
+                    option.textContent = dir.label + (dir.path === '.' ? '' : '  —  ' + dir.path);
+                    option.title = dir.absolute_path || dir.path;
+                    optgroup.appendChild(option);
+                    count += 1;
+                });
+                select.appendChild(optgroup);
+            });
+
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = count
+                ? placeholder
+                : (emptyLabel || 'Aucun dossier disponible');
+            select.insertBefore(placeholderOption, select.firstChild);
+
+            if (previous) {
+                syncFolderSelectValue(select, previous);
+            } else {
+                select.value = '';
+            }
+            select.disabled = count === 0;
+            return count;
+        }
+
+        function folderGroupsForScript(name) {
+            const groups = state.directoryGroups || [];
+            if (name !== 'backup_world.py') return groups;
+            // Ce script ne sauvegarde que les mondes Minecraft.
+            return groups
+                .filter((group) => group.id === 'worlds')
+                .map((group) => ({ ...group, directories: group.directories || [] }));
+        }
+
+        function refreshScriptFolderSelect() {
+            const select = document.getElementById('script-folder');
+            const hint = document.getElementById('script-folder-hint');
+
+            if (!state.selected) {
+                select.innerHTML = '<option value="">Sélectionne d\'abord un script</option>';
+                select.disabled = true;
+                hint.textContent = 'Choisis un dossier : il devient le premier argument. Tu peux aussi saisir un chemin manuellement.';
+                return;
+            }
+
+            const isBackup = state.selected.name === 'backup_world.py';
+            const count = fillFolderSelect(
+                select,
+                folderGroupsForScript(state.selected.name),
+                isBackup ? '— Choisir le monde à sauvegarder —' : '— Choisir un dossier —',
+                isBackup
+                    ? 'Aucun monde détecté (démarre un serveur une première fois)'
+                    : 'Aucun dossier disponible'
+            );
+
+            const firstArg = parseArgs()[0];
+            if (firstArg) syncFolderSelectValue(select, firstArg);
+
+            if (isBackup) {
+                hint.textContent = count
+                    ? "Le monde choisi est sauvegardé en ZIP ; l'archive porte le nom du serveur."
+                    : "Aucun monde Minecraft détecté. Tu peux saisir un dossier manuellement.";
+            } else {
+                hint.textContent = 'Choisis un dossier : il devient le premier argument. Tu peux aussi saisir un chemin manuellement.';
+            }
+        }
+
+        function refreshInventoryFolderSelect() {
+            const select = document.getElementById('inventory-folder');
+            const input = document.getElementById('inventory-path');
+            fillFolderSelect(
+                select,
+                state.directoryGroups,
+                '— Choisir un dossier —',
+                'Aucun dossier disponible'
+            );
+            if (input.value.trim()) syncFolderSelectValue(select, input.value.trim());
+        }
+
+        async function loadDirectories() {
+            try {
+                const res = await fetch('/api/fs/directories');
+                const data = await res.json();
+                if (!res.ok || data.status !== 'ok') {
+                    throw new Error(data.message || 'Impossible de charger les dossiers.');
+                }
+                state.directoryGroups = Array.isArray(data.groups) ? data.groups : [];
+            } catch (error) {
+                state.directoryGroups = [];
+                showToast('Dossiers indisponibles : ' + error.message, true);
+            }
+            refreshScriptFolderSelect();
+            refreshInventoryFolderSelect();
+        }
+
+        async function refreshToolbox() {
+            await Promise.allSettled([loadDirectories(), loadScripts()]);
+        }
+
+        function applyScriptFolder(path) {
+            if (!path) return;
+            const textarea = document.getElementById('script-args');
+            const lines = textarea.value.split(/\r?\n/);
+            const firstArgIndex = lines.findIndex((line) => line.trim().length > 0);
+
+            if (firstArgIndex === -1) {
+                textarea.value = path;
+            } else {
+                lines[firstArgIndex] = path;
+                textarea.value = lines.join('\n');
+            }
+            textarea.focus();
+            showToast('Dossier ajouté : ' + path);
+        }
+
+        function applyInventoryFolder(path) {
+            if (!path) return;
+            document.getElementById('inventory-path').value = path;
+        }
+
+        function shellQuote(arg) {
+            if (/^[A-Za-z0-9_./:\\-]+$/.test(arg)) return arg;
+            return '"' + arg.replace(/"/g, '\\"') + '"';
+        }
+
+        let toastTimer = null;
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('i');
+            document.getElementById('toast-text').textContent = message;
+            icon.className = (isError ? 'fa-solid fa-circle-exclamation text-red-400' : 'fa-solid fa-circle-check text-emerald-400') + ' mr-2';
+            toast.classList.remove('opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('opacity-0'), 3200);
+        }
+
+        async function logout() {
+            try { await _goatFetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+            window.location.replace('/login.html');
+        }
+
+        function renderScriptList() {
+            const list = document.getElementById('script-list');
+            if (!state.scripts.length) {
+                list.innerHTML = `
+                    <div class="text-xs text-slate-400 p-4 border border-dashed border-slate-700 rounded bg-[#060911] leading-relaxed">
+                        <i class="fa-solid fa-inbox text-slate-500 mr-1.5"></i>
+                        Aucun script <code class="font-mono text-amber-300">.py</code> disponible.
+                        <div class="text-slate-500 mt-1">Ajoute un fichier dans <code class="font-mono">scripts/</code>, puis actualise.</div>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = state.scripts.map((script) => {
+                const active = state.selected && state.selected.name === script.name;
+                const border = active ? 'border-amber-500/70 bg-amber-950/20' : 'border-slate-800 bg-[#060911] hover:border-slate-600';
+                return `
+                    <button type="button" onclick="selectScript(decodeURIComponent(this.dataset.script))" data-script="${encodeURIComponent(script.name)}"
+                            class="w-full text-left border ${border} rounded p-3 transition-all group">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-mono text-xs font-bold ${active ? 'text-amber-300' : 'text-slate-200'} break-all">
+                                <i class="fa-solid fa-file-code mr-1.5 ${active ? 'text-amber-400' : 'text-slate-500'}"></i>${escapeHtml(script.name)}
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[10px] ${active ? 'text-amber-400' : 'text-slate-600 group-hover:text-slate-400'}"></i>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1.5 leading-snug">${escapeHtml(script.description || 'Aucune description (ajoute une docstring au script).')}</p>
+                        <div class="font-mono text-[10px] text-slate-500 mt-2 flex items-center space-x-2">
+                            <span>${formatSize(script.size)}</span>
+                            <span>•</span>
+                            <span>${escapeHtml(formatDate(script.modified))}</span>
+                        </div>
+                    </button>`;
+            }).join('');
+        }
+
+        function selectScript(name) {
+            const script = state.scripts.find((item) => item.name === name);
+            if (!script) return;
+            state.selected = script;
+            renderScriptList();
+
+            document.getElementById('selected-script-name').textContent = script.name;
+            document.getElementById('selected-script-desc').textContent = script.description || 'Aucune description disponible.';
+            document.getElementById('selected-script-meta').textContent =
+                `scripts/${script.name}  •  ${formatSize(script.size)}  •  modifié le ${formatDate(script.modified)}`;
+            refreshScriptFolderSelect();
+            updateRunButton();
+        }
+
+        function resetSelectedScript() {
+            state.selected = null;
+            document.getElementById('selected-script-name').textContent = 'Aucun script sélectionné';
+            document.getElementById('selected-script-desc').textContent = 'Sélectionne un script dans la liste de gauche.';
+            document.getElementById('selected-script-meta').textContent = '--';
+            refreshScriptFolderSelect();
+            updateRunButton();
+        }
+
+        function updateRunButton() {
+            const button = document.getElementById('run-btn');
+            button.disabled = !state.selected || state.running;
+            document.getElementById('run-label').textContent = state.running ? 'EXÉCUTION...' : 'EXÉCUTER';
+            document.getElementById('run-icon').className = state.running
+                ? 'fa-solid fa-circle-notch fa-spin'
+                : 'fa-solid fa-play';
+        }
+
+        async function loadScripts() {
+            const list = document.getElementById('script-list');
+            const refreshIcon = document.getElementById('refresh-icon');
+            refreshIcon.classList.add('fa-spin');
+            list.innerHTML = `
+                <div class="text-xs font-mono text-slate-500 p-3 border border-slate-800 rounded bg-[#060911]">
+                    <i class="fa-solid fa-circle-notch fa-spin mr-2 text-amber-400"></i>Chargement des scripts...
+                </div>`;
+            try {
+                const res = await fetch('/api/scripts');
+                const data = await res.json();
+                if (!res.ok || data.status !== 'ok') {
+                    throw new Error(data.message || 'Impossible de charger les scripts.');
+                }
+                state.scripts = Array.isArray(data.scripts) ? data.scripts : [];
+                document.getElementById('script-count').textContent =
+                    state.scripts.length + (state.scripts.length > 1 ? ' SCRIPTS' : ' SCRIPT');
+
+                const previous = state.selected ? state.selected.name : null;
+                const next = state.scripts.find((item) => item.name === previous) || state.scripts[0];
+                if (next) {
+                    selectScript(next.name);
+                } else {
+                    resetSelectedScript();
+                    renderScriptList();
+                }
+            } catch (error) {
+                state.scripts = [];
+                resetSelectedScript();
+                list.innerHTML = `
+                    <div class="text-xs text-red-300 p-3 border border-red-900/60 rounded bg-red-950/30">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>${escapeHtml(error.message)}
+                    </div>`;
+                document.getElementById('script-count').textContent = 'ERREUR';
+            } finally {
+                refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function parseArgs() {
+            return document.getElementById('script-args').value
+                .split(/\r?\n/)
+                .map((line) => line.trim())
+                .filter((line) => line.length > 0);
+        }
+
+        function setRunStatus(kind, label) {
+            const dot = document.getElementById('run-status-dot');
+            const status = document.getElementById('run-status');
+            const classes = {
+                idle: ['bg-slate-600', 'text-slate-500'],
+                running: ['bg-amber-400', 'text-amber-300'],
+                success: ['bg-emerald-400', 'text-emerald-400'],
+                error: ['bg-red-500', 'text-red-400'],
+                timeout: ['bg-amber-500', 'text-amber-400']
+            };
+            const selected = classes[kind] || classes.idle;
+            dot.className = 'h-2 w-2 rounded-full ' + selected[0];
+            status.className = 'font-normal ' + selected[1];
+            status.textContent = label;
+        }
+
+        function setExitBadge(exitCode) {
+            const badge = document.getElementById('run-exit-badge');
+            if (exitCode === null || exitCode === undefined) {
+                badge.classList.add('hidden');
+                return;
+            }
+            badge.classList.remove('hidden');
+            const ok = exitCode === 0;
+            badge.textContent = 'CODE ' + exitCode;
+            badge.className = 'px-2 py-0.5 rounded border text-[10px] font-bold ' +
+                (ok ? 'bg-emerald-950/60 text-emerald-300 border-emerald-700/60'
+                    : 'bg-red-950/60 text-red-300 border-red-700/60');
+        }
+
+        function appendConsoleBlock(label, text, extraClass = '') {
+            const container = document.getElementById('console-output');
+            const block = document.createElement('div');
+            if (label) {
+                const heading = document.createElement('div');
+                heading.className = 'font-mono text-[10px] uppercase tracking-wide mb-1 ' + (extraClass || 'text-slate-500');
+                heading.textContent = label;
+                block.appendChild(heading);
+            }
+            const pre = document.createElement('pre');
+            pre.className = 'whitespace-pre-wrap break-words font-mono text-xs ' + (extraClass || 'text-slate-300');
+            pre.textContent = text;
+            block.appendChild(pre);
+            container.appendChild(block);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendConsolePrompt(prompt) {
+            const container = document.getElementById('console-output');
+            const pre = document.createElement('pre');
+            pre.className = 'whitespace-pre-wrap break-words font-mono text-xs text-cyan-300';
+            pre.textContent = prompt;
+            container.appendChild(pre);
+        }
+
+        function resetConsoleView() {
+            document.getElementById('console-output').innerHTML = '';
+        }
+
+        function clearConsole() {
+            resetConsoleView();
+            state.lastOutput = '';
+            setRunStatus('idle', 'EN ATTENTE');
+            setExitBadge(null);
+            document.getElementById('run-duration').textContent = '';
+            const container = document.getElementById('console-output');
+            const placeholder = document.createElement('div');
+            placeholder.className = 'text-slate-600';
+            placeholder.textContent = 'Le résultat du script apparaîtra ici.';
+            container.appendChild(placeholder);
+        }
+
+        async function runScript() {
+            if (!state.selected || state.running) return;
+
+            const args = parseArgs();
+            if (args.length > 32) {
+                showToast('Maximum 32 arguments.', true);
+                return;
+            }
+            if (args.some((arg) => arg.length > 1024)) {
+                showToast('Un argument dépasse 1024 caractères.', true);
+                return;
+            }
+            if (args.reduce((total, arg) => total + arg.length, 0) > 8192) {
+                showToast('Total des arguments trop long (8192 caractères max).', true);
+                return;
+            }
+
+            const script = state.selected;
+            const prompt = '$ python scripts/' + script.name + (args.length ? ' ' + args.map(shellQuote).join(' ') : '');
+            state.running = true;
+            state.lastOutput = '';
+            updateRunButton();
+            setRunStatus('running', 'EXÉCUTION...');
+            setExitBadge(null);
+            document.getElementById('run-duration').textContent = '';
+            resetConsoleView();
+            appendConsolePrompt(prompt);
+            appendConsoleBlock('', 'Exécution en cours...', 'text-slate-500');
+
+            const started = performance.now();
+            try {
+                const res = await fetch('/api/scripts/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ script_name: script.name, args: args })
+                });
+                const data = await res.json();
+                const elapsed = ((performance.now() - started) / 1000).toFixed(2);
+
+                resetConsoleView();
+                appendConsolePrompt(prompt);
+
+                if (!res.ok || data.status === 'error') {
+                    const message = data.message || ('Erreur HTTP ' + res.status);
+                    appendConsoleBlock('ERREUR', message, 'text-red-400');
+                    setRunStatus('error', 'ÉCHEC');
+                    document.getElementById('run-duration').textContent = elapsed + ' s';
+                    state.lastOutput = prompt + '\n\n[ERREUR] ' + message;
+                    showToast(message, true);
+                    return;
+                }
+
+                let output = prompt + '\n';
+                if (data.stdout) {
+                    appendConsoleBlock('STDOUT', data.stdout, 'text-slate-200');
+                    output += '\n' + data.stdout;
+                }
+                if (data.stderr) {
+                    appendConsoleBlock('STDERR', data.stderr, 'text-red-400');
+                    output += '\n[STDERR]\n' + data.stderr;
+                }
+                if (!data.stdout && !data.stderr) {
+                    appendConsoleBlock('', '(aucune sortie)', 'text-slate-500');
+                }
+                if (data.stdout_truncated || data.stderr_truncated) {
+                    appendConsoleBlock('ATTENTION', 'Sortie tronquée à 1 Mo par flux.', 'text-amber-400');
+                    output += '\n[Sortie tronquée à 1 Mo par flux.]';
+                }
+                if (data.message) {
+                    appendConsoleBlock('INFO', data.message, 'text-amber-400');
+                    output += '\n[INFO] ' + data.message;
+                }
+
+                state.lastOutput = output;
+                document.getElementById('run-duration').textContent = elapsed + ' s';
+                setExitBadge(data.exit_code);
+                if (data.status === 'timeout') {
+                    setRunStatus('timeout', 'DÉLAI DÉPASSÉ');
+                    showToast('Script interrompu : délai dépassé.', true);
+                } else if (data.exit_code === 0) {
+                    setRunStatus('success', 'TERMINÉ');
+                    showToast('Script terminé avec succès.');
+                } else {
+                    setRunStatus('error', 'ÉCHEC');
+                    showToast('Le script a retourné le code ' + data.exit_code + '.', true);
+                }
+            } catch (error) {
+                resetConsoleView();
+                appendConsolePrompt(prompt);
+                appendConsoleBlock('ERREUR SYSTÈME', error.message, 'text-red-400');
+                setRunStatus('error', 'ÉCHEC');
+                state.lastOutput = prompt + '\n\n[ERREUR SYSTÈME] ' + error.message;
+                showToast(error.message, true);
+            } finally {
+                state.running = false;
+                updateRunButton();
+            }
+        }
+
+        async function copyText(text, successMessage) {
+            if (!text) {
+                showToast('Rien à copier.', true);
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast(successMessage);
+            } catch (error) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast(successMessage);
+                } catch (fallbackError) {
+                    showToast('Copie impossible dans ce navigateur.', true);
+                } finally {
+                    textarea.remove();
+                }
+            }
+        }
+
+        function copyConsole() {
+            copyText(state.lastOutput, 'Sortie copiée dans le presse-papiers.');
+        }
+
+        function copyInventory() {
+            copyText(state.inventoryText, 'Inventaire copié dans le presse-papiers.');
+        }
+
+        async function runInventory(downloadAfter) {
+            const pathInput = document.getElementById('inventory-path');
+            const path = pathInput.value.trim() || '.';
+            const button = document.getElementById('inventory-btn');
+            const downloadButton = document.getElementById('inventory-download-btn');
+            const output = document.getElementById('inventory-output');
+            const status = document.getElementById('inventory-status');
+
+            button.disabled = true;
+            document.getElementById('inventory-label').textContent = 'GÉNÉRATION...';
+            document.getElementById('inventory-icon').className = 'fa-solid fa-circle-notch fa-spin';
+            downloadButton.disabled = true;
+            state.inventoryUrl = null;
+            state.inventoryText = '';
+            output.textContent = "Génération de l'inventaire...";
+            status.textContent = 'Lecture du dossier en cours...';
+            status.className = 'font-mono text-[11px] text-amber-400';
+
+            const url = '/api/fs/export-listing?target_dir=' + encodeURIComponent(path);
+            try {
+                const res = await fetch(url);
+                const text = await res.text();
+                output.textContent = text;
+                if (!res.ok) {
+                    status.textContent = 'Dossier introuvable ou inaccessible.';
+                    status.className = 'font-mono text-[11px] text-red-400';
+                    showToast('Impossible de générer l\'inventaire.', true);
+                    return;
+                }
+                state.inventoryText = text;
+                state.inventoryUrl = url;
+                downloadButton.disabled = false;
+                const lineCount = text.split('\n').length;
+                status.textContent = `Inventaire généré : ${lineCount} ligne(s), ${text.length.toLocaleString('fr-FR')} caractère(s).`;
+                status.className = 'font-mono text-[11px] text-emerald-400';
+                showToast('Inventaire généré.');
+                if (downloadAfter) downloadInventory();
+            } catch (error) {
+                output.textContent = 'Erreur : ' + error.message;
+                status.textContent = 'Erreur lors de la génération.';
+                status.className = 'font-mono text-[11px] text-red-400';
+                showToast(error.message, true);
+            } finally {
+                button.disabled = false;
+                document.getElementById('inventory-label').textContent = 'GÉNÉRER';
+                document.getElementById('inventory-icon').className = 'fa-solid fa-list';
+            }
+        }
+
+        function downloadInventory() {
+            if (!state.inventoryUrl) {
+                showToast("Génère d'abord un inventaire.", true);
+                return;
+            }
+            const link = document.createElement('a');
+            link.href = state.inventoryUrl;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            showToast('Téléchargement de l\'inventaire lancé.');
+        }
+
+        document.getElementById('script-args').addEventListener('keydown', (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault();
+                runScript();
+            }
+        });
+
+        document.getElementById('script-args').addEventListener('input', () => {
+            const firstArg = parseArgs()[0];
+            const select = document.getElementById('script-folder');
+            if (firstArg) {
+                syncFolderSelectValue(select, firstArg);
+            } else {
+                select.value = '';
+            }
+        });
+
+        document.getElementById('inventory-path').addEventListener('input', () => {
+            syncFolderSelectValue(
+                document.getElementById('inventory-folder'),
+                document.getElementById('inventory-path').value.trim()
+            );
+        });
+
+        document.getElementById('inventory-path').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                runInventory(false);
+            }
+        });
+
+        refreshToolbox();
+    </script>
 </body>
 </html>

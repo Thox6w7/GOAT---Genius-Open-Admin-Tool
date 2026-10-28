@@ -35,6 +35,10 @@
                 <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
                 <span>PANIC STOP</span>
             </button>
+            <button onclick="logout()" title="Se déconnecter" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded font-mono font-bold text-xs flex items-center space-x-2 transition-all">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>QUITTER</span>
+            </button>
         </div>
     </header>
 
@@ -47,6 +51,10 @@
         <a href="/minecraft.html" class="py-3 px-4 border-b-2 border-emerald-500 text-emerald-400 font-bold flex items-center space-x-2">
             <i class="fa-solid fa-cube text-emerald-400"></i>
             <span>MINECRAFT</span>
+        </a>
+        <a href="/ark.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-dragon text-amber-400"></i>
+            <span>ARK</span>
         </a>
         <a href="/dashboard.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
             <i class="fa-solid fa-chart-line"></i>
@@ -378,12 +386,28 @@
     </div>
 
     <script>
+        // Toute session expirée renvoie vers l'écran de connexion.
+        const _goatFetch = window.fetch.bind(window);
+        window.fetch = async (...args) => {
+            const res = await _goatFetch(...args);
+            if (res.status === 401) {
+                window.location.replace('/login.html?next=' + encodeURIComponent(window.location.pathname));
+            }
+            return res;
+        };
+
         let serversList = [];
         let activeServerId = localStorage.getItem('goat_active_server') || null;
         let logsWs = null;
+        let telemWs = null;
 
         let searchMatches = [];
         let currentMatchIndex = -1;
+
+        async function logout() {
+            try { await _goatFetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+            window.location.replace('/login.html');
+        }
 
         async function loadServers() {
             try {
@@ -405,6 +429,7 @@
                 } else {
                     document.getElementById('console-output').innerHTML = '<div class="text-slate-600">Aucun serveur configuré. Cliquez sur « Créer » ou « Importer ».</div>';
                 }
+                connectTelemetryWs();
             } catch (err) {
                 console.error("Erreur chargement serveurs:", err);
             }
@@ -422,16 +447,17 @@
                     ? 'bg-slate-800 border-emerald-500/60 text-emerald-400 font-bold shadow-md' 
                     : 'bg-[#0f172a] border-slate-800 text-slate-400 hover:text-slate-200'
                 }`;
-                btn.innerHTML = `
-                    <span class="h-2 w-2 rounded-full ${srv.status === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}"></span>
-                    <span>${srv.name}</span>
-                `;
+                btn.innerHTML = `<span class="h-2 w-2 rounded-full ${srv.status === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}"></span>`;
+                const label = document.createElement('span');
+                label.textContent = srv.name;
+                btn.appendChild(label);
                 btn.onclick = () => {
                     activeServerId = srv.id;
                     localStorage.setItem('goat_active_server', activeServerId);
                     renderServerTabs();
                     renderActiveServerInfo();
                     connectLogsWs(activeServerId);
+                    connectTelemetryWs();
                     document.getElementById('properties-editor-panel').classList.add('hidden');
                 };
                 container.appendChild(btn);
@@ -874,23 +900,29 @@
             }
         }
 
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const telemWs = new WebSocket(`${wsProtocol}//${window.location.host}/ws/telemetry`);
-
-        telemWs.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            const mcBadge = document.getElementById('badge-mc');
-            const mcTxt = document.getElementById('txt-mc');
-            if (data.mc_running) {
-                mcBadge.className = "h-2 w-2 rounded-full bg-emerald-500";
-                mcTxt.textContent = "ONLINE";
-                mcTxt.className = "text-emerald-400 font-bold";
-            } else {
-                mcBadge.className = "h-2 w-2 rounded-full bg-red-500";
-                mcTxt.textContent = "OFFLINE";
-                mcTxt.className = "text-red-400 font-bold";
+        function connectTelemetryWs() {
+            if (telemWs) {
+                telemWs.close();
             }
-        };
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const query = activeServerId ? `?server_id=${encodeURIComponent(activeServerId)}` : '';
+            telemWs = new WebSocket(`${wsProtocol}//${window.location.host}/ws/telemetry${query}`);
+
+            telemWs.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const mcBadge = document.getElementById('badge-mc');
+                const mcTxt = document.getElementById('txt-mc');
+                if (data.mc_running) {
+                    mcBadge.className = "h-2 w-2 rounded-full bg-emerald-500";
+                    mcTxt.textContent = "ONLINE";
+                    mcTxt.className = "text-emerald-400 font-bold";
+                } else {
+                    mcBadge.className = "h-2 w-2 rounded-full bg-red-500";
+                    mcTxt.textContent = "OFFLINE";
+                    mcTxt.className = "text-red-400 font-bold";
+                }
+            };
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             loadServers();

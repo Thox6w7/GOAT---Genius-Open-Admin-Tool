@@ -27,6 +27,10 @@
                 <span id="badge-mc" class="h-2 w-2 rounded-full bg-red-500"></span>
                 <span>MINECRAFT: <span id="txt-mc" class="text-red-400 font-bold">OFFLINE</span></span>
             </div>
+            <button onclick="logout()" title="Se déconnecter" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded font-bold flex items-center space-x-2 transition-all">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>QUITTER</span>
+            </button>
         </div>
     </header>
 
@@ -39,6 +43,10 @@
         <a href="/minecraft.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
             <i class="fa-solid fa-cube text-emerald-400"></i>
             <span>MINECRAFT</span>
+        </a>
+        <a href="/ark.html" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+            <i class="fa-solid fa-dragon text-amber-400"></i>
+            <span>ARK</span>
         </a>
         <a href="/dashboard.html" class="py-3 px-4 border-b-2 border-cyan-500 text-cyan-400 font-bold flex items-center space-x-2">
             <i class="fa-solid fa-chart-line"></i>
@@ -128,6 +136,20 @@
     </main>
 
     <script>
+        const _goatFetch = window.fetch.bind(window);
+        window.fetch = async (...args) => {
+            const res = await _goatFetch(...args);
+            if (res.status === 401) {
+                window.location.replace('/login.html?next=' + encodeURIComponent(window.location.pathname));
+            }
+            return res;
+        };
+
+        async function logout() {
+            try { await _goatFetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+            window.location.replace('/login.html');
+        }
+
         const ctxCpu = document.getElementById('chart-cpu').getContext('2d');
         const ctxRam = document.getElementById('chart-ram').getContext('2d');
 

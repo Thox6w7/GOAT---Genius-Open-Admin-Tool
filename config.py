@@ -8,7 +8,9 @@ else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Paramètres du serveur Web
-SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
+# 127.0.0.1 = accessible uniquement depuis cette machine (recommandé).
+# Mets SERVER_HOST=0.0.0.0 pour un accès réseau : le panel exige alors un mot de passe.
+SERVER_HOST = os.getenv("SERVER_HOST", "127.0.0.1")
 SERVER_PORT = int(os.getenv("SERVER_PORT", 8000))
 
 # Configuration RCON Minecraft
