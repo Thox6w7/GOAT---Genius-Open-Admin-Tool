@@ -1,8 +1,7 @@
-"""Création de serveurs ARK via SteamCMD et l'API Steam.
+"""Création de serveurs ARK: Survival Evolved via SteamCMD et l'API Steam.
 
-Aucun fichier de map n'est stocké par le panel : les cartes font partie du
-téléchargement SteamCMD (app de base, plus le DLC de la map pour Survival
-Ascended). Le panel ne conserve que des identifiants de maps.
+Aucun fichier de map n'est stocké par le panel : les cartes arrivent avec l'app
+serveur téléchargée par SteamCMD. Le panel ne conserve que des identifiants de maps.
 """
 
 import os
@@ -30,49 +29,27 @@ MAX_LOG_LINES = 400
 # Marqueur déposé pendant l'installation : le scanner de dossiers l'ignore.
 INSTALL_MARKER = ".goat-installing"
 
-EDITIONS = {
-    "ase": {
-        "label": "ARK: Survival Evolved",
-        "app_id": 376030,
-        "store_app_id": 346110,
-        "exe": ("ShooterGame", "Binaries", "Win64", "ShooterGameServer.exe"),
-        "maps_in_base": True,
-        "default_map": "TheIsland",
-        "maps": [
-            ("TheIsland", "The Island"),
-            ("ScorchedEarth", "Scorched Earth"),
-            ("TheCenter", "The Center"),
-            ("Ragnarok", "Ragnarok"),
-            ("Aberration", "Aberration"),
-            ("Extinction", "Extinction"),
-            ("Valguero", "Valguero"),
-            ("CrystalIsles", "Crystal Isles"),
-            ("Genesis", "Genesis: Part 1"),
-            ("Gen2", "Genesis: Part 2"),
-            ("LostIsland", "Lost Island"),
-            ("Fjordur", "Fjordur"),
-        ],
-    },
-    "asa": {
-        "label": "ARK: Survival Ascended",
-        "app_id": 2430930,
-        "store_app_id": 2399830,
-        "exe": ("ShooterGame", "Binaries", "Win64", "ArkAscendedServer.exe"),
-        "maps_in_base": False,
-        "default_map": "TheIsland_WP",
-        "maps": [
-            ("TheIsland_WP", "The Island"),
-            ("ScorchedEarth_WP", "Scorched Earth"),
-            ("TheCenter_WP", "The Center"),
-            ("Aberration_WP", "Aberration"),
-            ("Extinction_WP", "Extinction"),
-            ("Ragnarok_WP", "Ragnarok"),
-            ("Valguero_WP", "Valguero"),
-            ("CrystalIsles_WP", "Crystal Isles"),
-            ("LostIsland_WP", "Lost Island"),
-            ("Fjordur_WP", "Fjordur"),
-        ],
-    },
+EDITION = {
+    "key": "se",
+    "label": "ARK: Survival Evolved",
+    "app_id": 376030,
+    "store_app_id": 346110,
+    "exe": ("ShooterGame", "Binaries", "Win64", "ShooterGameServer.exe"),
+    "default_map": "TheIsland",
+    "maps": [
+        ("TheIsland", "The Island"),
+        ("ScorchedEarth", "Scorched Earth"),
+        ("TheCenter", "The Center"),
+        ("Ragnarok", "Ragnarok"),
+        ("Aberration", "Aberration"),
+        ("Extinction", "Extinction"),
+        ("Valguero", "Valguero"),
+        ("CrystalIsles", "Crystal Isles"),
+        ("Genesis", "Genesis: Part 1"),
+        ("Gen2", "Genesis: Part 2"),
+        ("LostIsland", "Lost Island"),
+        ("Fjordur", "Fjordur"),
+    ],
 }
 
 PROGRESS_RE = re.compile(r"progress:\s*([0-9]+(?:\.[0-9]+)?)")
@@ -153,58 +130,39 @@ async def fetch_app_details(app_id: int):
     return details
 
 
-async def resolve_map_apps(edition_key: str, map_id: str):
+async def resolve_map_apps(map_id: str):
     """Retourne (app_ids, libellés, avertissements) à installer pour une map.
 
     Les maps ne sont jamais stockées par le panel : elles arrivent avec l'app
-    serveur téléchargée par SteamCMD.
+    serveur ARK: Survival Evolved téléchargée par SteamCMD.
     """
-    edition = EDITIONS[edition_key]
-    base_app = edition["app_id"]
-    base_label = f"{edition['label']} (app {base_app})"
-    warnings = []
+    base_app = EDITION["app_id"]
+    return [base_app], [f"{EDITION['label']} (app {base_app})"], []
 
-    if edition_key == "asa" and map_id != edition["default_map"]:
-        warnings.append(
-            "Les maps ASA supplémentaires sont distribuées avec l'app serveur 2430930. "
-            "Si SteamCMD renvoie « Access Denied » sur un dépôt, la map est un DLC payant : "
-            "connecte SteamCMD avec un compte Steam qui la possède."
+
+async def catalog_payload():
+    """Édition ARK SE, maps disponibles et état de SteamCMD."""
+    entry = {
+        "key": EDITION["key"],
+        "label": EDITION["label"],
+        "app_id": EDITION["app_id"],
+        "default_map": EDITION["default_map"],
+        "maps": [{"id": m, "label": lbl} for m, lbl in EDITION["maps"]],
+        "api_ok": False,
+        "message": "",
+    }
+    try:
+        details = await fetch_app_details(EDITION["store_app_id"])
+        if details and details.get("name"):
+            entry["label"] = details["name"]
+        entry["api_ok"] = True
+        entry["message"] = "Toutes les maps officielles arrivent avec l'app serveur SteamCMD."
+    except Exception as exc:
+        entry["message"] = (
+            f"API Steam injoignable ({exc}). L'installation utilisera l'app serveur {EDITION['app_id']}."
         )
 
-    return [base_app], [base_label], warnings
-
-
-async def editions_payload():
-    """Éditions ARK, maps disponibles et état de SteamCMD."""
-    result = []
-    for key, edition in EDITIONS.items():
-        entry = {
-            "key": key,
-            "label": edition["label"],
-            "app_id": edition["app_id"],
-            "default_map": edition["default_map"],
-            "maps_in_base": edition["maps_in_base"],
-            "maps": [{"id": m, "label": lbl} for m, lbl in edition["maps"]],
-            "api_ok": False,
-            "message": "",
-        }
-        try:
-            details = await fetch_app_details(edition["store_app_id"])
-            if details and details.get("name"):
-                entry["label"] = details["name"]
-            entry["api_ok"] = True
-            entry["message"] = (
-                "Toutes les maps officielles arrivent avec l'app serveur SteamCMD."
-                if edition["maps_in_base"]
-                else "Les maps arrivent avec l'app serveur SteamCMD ; le panel ne stocke aucun fichier de map."
-            )
-        except Exception as exc:
-            entry["message"] = (
-                f"API Steam injoignable ({exc}). L'installation utilisera l'app serveur {edition['app_id']}."
-            )
-        result.append(entry)
-
-    return {"steamcmd": steamcmd_status(), "editions": result}
+    return {"steamcmd": steamcmd_status(), "edition": entry}
 
 
 # --- 2. SUIVI DES JOBS ---
@@ -231,7 +189,6 @@ def _new_job(kind: str, **extra):
         "stage": "En attente...",
         "server_id": "",
         "name": "",
-        "edition": "",
         "map": "",
         "server_dir": "",
         "app_ids": [],
@@ -365,8 +322,7 @@ def _bootstrap_steamcmd(job):
     return exe
 
 
-def _write_configs(server_dir, edition_key, params):
-    edition = EDITIONS[edition_key]
+def _write_configs(server_dir, params):
     cfg_dir = os.path.join(server_dir, "ShooterGame", "Saved", "Config", "WindowsServer")
     os.makedirs(cfg_dir, exist_ok=True)
 
@@ -397,7 +353,7 @@ NoBattlEye=True
     with open(_append_log, "w", encoding="utf-8") as f:
         f.write(
             f"Serveur ARK créé par GOAT le {_now()}\n"
-            f"Edition   : {edition['label']} (app {edition['app_id']})\n"
+            f"Jeu       : {EDITION['label']} (app {EDITION['app_id']})\n"
             f"Map       : {params['map']}\n"
             f"Jeu       : {int(params['server_port'])}\n"
             f"Query     : {int(params['query_port'])}\n"
@@ -434,15 +390,14 @@ def _worker(job, params, on_success):
         if code != 0:
             raise RuntimeError(f"SteamCMD a renvoyé le code {code}. Consulte le journal d'installation.")
 
-        edition = EDITIONS[params["edition"]]
-        exe_server = os.path.join(server_dir, *edition["exe"])
+        exe_server = os.path.join(server_dir, *EDITION["exe"])
         if not os.path.isfile(exe_server):
             raise RuntimeError(
                 f"L'exécutable du serveur est absent après installation : {exe_server}"
             )
 
         job["stage"] = "Écriture de la configuration..."
-        _write_configs(server_dir, params["edition"], params)
+        _write_configs(server_dir, params)
 
         try:
             os.remove(os.path.join(server_dir, INSTALL_MARKER))
@@ -497,7 +452,6 @@ def start_server_job(params, on_success=None):
     job = _new_job(
         "server",
         name=params["name"],
-        edition=params["edition"],
         map=params["map"],
         server_id=params["server_id"],
         server_dir=params["server_dir"],
@@ -545,7 +499,6 @@ def public_job(job):
         "error": job["error"],
         "server_id": job["server_id"],
         "name": job["name"],
-        "edition": job["edition"],
         "map": job["map"],
         "server_dir": job["server_dir"],
         "app_ids": job["app_ids"],

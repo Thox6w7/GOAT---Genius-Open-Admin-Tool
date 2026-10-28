@@ -16,7 +16,7 @@ GOAT est un outil local d'administration et de supervision système conçu pour 
 - **Déploiement en 1 clic :** téléchargement automatisé des versions et chargeurs avec validation automatique de l'EULA.
 - **Importation simple :** prise en charge des serveurs moddés existants via chemin absolu.
 - **Console temps réel :** streaming des logs JVM via WebSocket et terminal de commandes RCON interactif.
-- **Serveurs ARK :** création automatique via SteamCMD (sans stocker de map), import de serveurs ASE/ASA existants, lancement par `.bat` ou exécutable, console RCON (`SaveWorld`, `DoExit`) et logs `ShooterGame.log` en direct.
+- **Serveurs ARK :** création automatique de serveurs ARK: Survival Evolved via SteamCMD (sans stocker de map), import de serveurs existants, lancement par `.bat` ou exécutable, console RCON (`SaveWorld`, `DoExit`) et logs `ShooterGame.log` en direct.
 - **Éditeur de configuration :** modification directe de `server.properties` avec recherche intégrée.
 - **Supervision système :** métriques CPU/RAM de l'hôte vs processus Java en direct.
 - **Python Toolbox :** exécution des scripts de `scripts/` depuis l'interface (stdout/stderr, code de sortie), inventaire de dossiers et sauvegardes horodatées du dossier `world`.
@@ -97,29 +97,28 @@ touchée.
 
 ---
 
-## 🦖 Serveurs ARK (ASE / ASA)
+## 🦖 Serveurs ARK (Survival Evolved)
 
-L'onglet **ARK** (`/ark.html`) gère ARK: Survival Evolved (ASE) et ARK: Survival
-Ascended (ASA) : création automatique via SteamCMD, ou import d'une installation
-déjà présente sur le disque.
+L'onglet **ARK** (`/ark.html`) gère ARK: Survival Evolved : création automatique via
+SteamCMD, ou import d'une installation déjà présente sur le disque.
 
-- **Création :** `POST /api/ark/servers/create` valide le nom, l'édition, la map et les
-  ports (champs vides = attribution automatique), puis lance SteamCMD en arrière-plan
-  (`+login anonymous +app_update <app> validate`). Le panel ne stocke **aucune map** :
-  les cartes sont téléchargées avec l'app serveur Steam (`376030` pour ASE, `2430930`
-  pour ASA). L'avancement se suit avec `GET /api/ark/install/status?job_id=...` et
-  s'écrit dans `logs/ark-server-<job>.log`.
-- **SteamCMD :** `GET /api/ark/editions` renvoie les éditions, les maps disponibles et
+- **Création :** `POST /api/ark/servers/create` valide le nom, la map et les ports
+  (champs vides = attribution automatique), puis lance SteamCMD en arrière-plan
+  (`+login anonymous +app_update 376030 validate`). Le panel ne stocke **aucune map** :
+  les cartes sont téléchargées avec l'app serveur Steam `376030`. L'avancement se suit
+  avec `GET /api/ark/install/status?job_id=...` et s'écrit dans
+  `logs/ark-server-<job>.log`.
+- **SteamCMD :** `GET /api/ark/catalog` renvoie l'édition, les maps disponibles et
   l'état de SteamCMD. `POST /api/ark/steamcmd/install` le télécharge dans
   `tools/steamcmd/` (ignoré par git) si `steamcmd.exe` n'est pas déjà dans le `PATH`.
 - **Pendant l'installation :** le dossier porte un marqueur `.goat-installing` et reste
   masqué dans la liste. À la fin, le serveur apparaît avec `GameUserSettings.ini` déjà
   écrit (session, ports, RCON, mot de passe admin, nombre de joueurs).
 - **Import :** indique le dossier racine du serveur (celui qui contient `ShooterGame`,
-  un lanceur `.bat` ou `ShooterGame/Binaries/Win64/ArkAscendedServer.exe`).
+  un lanceur `.bat` ou `ShooterGame/Binaries/Win64/ShooterGameServer.exe`).
 - **Lancement :** priorité au premier `.bat` trouvé (`start_ark.bat`, `ark.bat`,
   `goat_ark.bat`, `run.bat`, `start.bat`, `launch.bat`, ou tout `.bat` contenant
-  `ShooterGameServer`/`ArkAscendedServer`). À défaut, l'exécutable est lancé avec les
+  `ShooterGameServer`). À défaut, l'exécutable est lancé avec les
   arguments URL (`?listen?SessionName=...?Port=...`) et `-server -log -NoBattlEye`.
 - **Détection du process :** par chemin de l'exécutable ARK dans le dossier du serveur
   (le cwd d'ARK est souvent `ShooterGame/Binaries/Win64`).

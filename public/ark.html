@@ -216,7 +216,7 @@
                 <div>
                     <label class="block text-slate-400 mb-1">Chemin absolu du dossier du serveur :</label>
                     <input id="import-ark-dir" required type="text" placeholder="Ex: C:\ArkServers\TheIsland" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
-                    <span class="text-[10px] text-slate-500">Dossier contenant ShooterGame (ASE/ASA), un lanceur .bat ou l'exécutable du serveur.</span>
+                    <span class="text-[10px] text-slate-500">Dossier contenant ShooterGame (ARK: Survival Evolved), un lanceur .bat ou l'exécutable du serveur.</span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -225,28 +225,18 @@
                         <input id="import-ark-map" required list="ark-maps" value="TheIsland" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
                         <datalist id="ark-maps">
                             <option value="TheIsland"></option>
-                            <option value="TheIsland_WP"></option>
                             <option value="TheCenter"></option>
-                            <option value="TheCenter_WP"></option>
                             <option value="ScorchedEarth"></option>
-                            <option value="ScorchedEarth_WP"></option>
                             <option value="Ragnarok"></option>
-                            <option value="Ragnarok_WP"></option>
                             <option value="Aberration"></option>
-                            <option value="Aberration_WP"></option>
                             <option value="Extinction"></option>
-                            <option value="Extinction_WP"></option>
                             <option value="Genesis"></option>
-                            <option value="Genesis_WP"></option>
+                            <option value="Gen2"></option>
                             <option value="Valguero"></option>
-                            <option value="Valguero_WP"></option>
                             <option value="CrystalIsles"></option>
-                            <option value="CrystalIsles_WP"></option>
                             <option value="LostIsland"></option>
                             <option value="Fjordur"></option>
-                            <option value="Fjordur_WP"></option>
                         </datalist>
-                        <span class="text-[10px] text-slate-500">Le suffixe _WP correspond aux maps ARK: Survival Ascended.</span>
                     </div>
                     <div>
                         <label class="block text-slate-400 mb-1">Port de jeu :</label>
@@ -305,20 +295,11 @@
                         <input id="create-ark-name" required type="text" placeholder="Ex: ARK Île PvE" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-slate-400 mb-1">Édition :</label>
-                            <select id="create-ark-edition" onchange="populateArkMaps()" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500 cursor-pointer">
-                                <option value="ase">ARK: Survival Evolved</option>
-                                <option value="asa">ARK: Survival Ascended</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-slate-400 mb-1">Map :</label>
-                            <select id="create-ark-map" required class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500 cursor-pointer">
-                                <option value="">Chargement...</option>
-                            </select>
-                        </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Map :</label>
+                        <select id="create-ark-map" required class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500 cursor-pointer">
+                            <option value="">Chargement...</option>
+                        </select>
                     </div>
                     <span id="create-ark-map-note" class="block text-[10px] text-slate-500"></span>
 
@@ -566,7 +547,7 @@
             const icon = document.getElementById('ark-steamcmd-icon');
             const text = document.getElementById('ark-steamcmd-text');
             try {
-                const res = await fetch('/api/ark/editions');
+                const res = await fetch('/api/ark/catalog');
                 arkCatalog = await res.json();
                 renderSteamcmdState(arkCatalog.steamcmd);
                 populateArkMaps();
@@ -596,24 +577,23 @@
 
         function populateArkMaps() {
             if (!arkCatalog) return;
-            const editionKey = document.getElementById('create-ark-edition').value;
-            const edition = (arkCatalog.editions || []).find(e => e.key === editionKey);
+            const edition = arkCatalog.edition || {};
             const select = document.getElementById('create-ark-map');
             select.innerHTML = '';
 
-            (edition ? edition.maps : []).forEach(m => {
+            (edition.maps || []).forEach(m => {
                 const option = document.createElement('option');
                 option.value = m.id;
                 option.textContent = m.label;
                 select.appendChild(option);
             });
 
-            if (edition) {
+            if (edition.default_map) {
                 select.value = edition.default_map;
             }
 
             const note = document.getElementById('create-ark-map-note');
-            note.textContent = edition ? edition.message : "";
+            note.textContent = edition.message || "";
         }
 
         function showArkJob(job) {
@@ -713,7 +693,6 @@
             const portValue = (id) => parseInt(document.getElementById(id).value, 10) || 0;
             const payload = {
                 name: document.getElementById('create-ark-name').value.trim(),
-                edition: document.getElementById('create-ark-edition').value,
                 map: document.getElementById('create-ark-map').value,
                 server_port: portValue('create-ark-game-port'),
                 query_port: portValue('create-ark-query-port'),

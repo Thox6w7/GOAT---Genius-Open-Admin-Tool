@@ -222,7 +222,7 @@ def remove_readonly(func, path, excinfo):
         pass
 
 
-ARK_EXECUTABLES = {"shootergameserver.exe", "arkascendedserver.exe"}
+ARK_EXECUTABLES = {"shootergameserver.exe"}
 
 
 def scan_server_processes():
@@ -350,13 +350,10 @@ def find_server_executable(target_dir):
 
 
 def detect_game(server_dir: str) -> str:
-    """Devine le jeu d'un dossier : ARK si structure ShooterGame, sinon Minecraft."""
+    """Devine le jeu d'un dossier : ARK SE si l'exécutable serveur est présent, sinon Minecraft."""
     try:
-        if os.path.isdir(os.path.join(server_dir, "ShooterGame")):
+        if os.path.isfile(os.path.join(server_dir, "ShooterGame", "Binaries", "Win64", "ShooterGameServer.exe")):
             return "ark"
-        for name in ("ArkAscendedServer.exe", "ShooterGameServer.exe"):
-            if os.path.isfile(os.path.join(server_dir, "ShooterGame", "Binaries", "Win64", name)):
-                return "ark"
     except OSError:
         pass
     return "minecraft"
@@ -378,18 +375,14 @@ def find_ark_launcher(target_dir):
         try:
             with open(entry.path, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read(4096).lower()
-            if "shootergameserver" in content or "arkascendedserver" in content:
+            if "shootergameserver" in content:
                 return "bat", entry.path, target_dir
         except OSError:
             continue
 
-    for rel in (
-        ("ShooterGame", "Binaries", "Win64", "ArkAscendedServer.exe"),
-        ("ShooterGame", "Binaries", "Win64", "ShooterGameServer.exe"),
-    ):
-        full_path = os.path.join(target_dir, *rel)
-        if os.path.isfile(full_path):
-            return "exe", full_path, os.path.dirname(full_path)
+    full_path = os.path.join(target_dir, "ShooterGame", "Binaries", "Win64", "ShooterGameServer.exe")
+    if os.path.isfile(full_path):
+        return "exe", full_path, os.path.dirname(full_path)
 
     return None, None, None
 
@@ -554,7 +547,6 @@ class ArkImportPayload(BaseModel):
 
 class ArkCreatePayload(BaseModel):
     name: str
-    edition: str = "ase"
     map: str = "TheIsland"
     server_port: int = 0
     query_port: int = 0
@@ -711,7 +703,7 @@ def import_ark_server(payload: ArkImportPayload):
     if not launcher:
         return {
             "status": "error",
-            "message": "Aucun serveur ARK détecté : il faut un dossier ShooterGame, un lanceur .bat ou l'exécutable ArkAscendedServer/ShooterGameServer.",
+            "message": "Aucun serveur ARK détecté : il faut un dossier ShooterGame, un lanceur .bat ou l'exécutable ShooterGameServer.",
         }
 
     if detect_game(target_dir) != "ark":
@@ -719,7 +711,7 @@ def import_ark_server(payload: ArkImportPayload):
 
     map_name = (payload.map or "").strip()
     if not re.match(r"^[A-Za-z0-9_\-\.]{1,64}$", map_name):
-        return {"status": "error", "message": "Nom de map invalide (exemple : TheIsland, TheIsland_WP, Ragnarok)."}
+        return {"status": "error", "message": "Nom de map invalide (exemple : TheIsland, Ragnarok)."}
 
     for label, port in (("jeu", payload.server_port), ("query", payload.query_port), ("RCON", payload.rcon_port)):
         if not (1 <= int(port) <= 65535):
@@ -806,9 +798,9 @@ def allocate_ark_ports():
     raise RuntimeError("Aucun port ARK libre trouvé.")
 
 
-@app.get("/api/ark/editions")
-async def get_ark_editions():
-    return await ark_installer.editions_payload()
+@app.get("/api/ark/catalog")
+async def get_ark_catalog():
+    return await ark_installer.catalog_payload()
 
 
 @app.post("/api/ark/steamcmd/install")
@@ -831,13 +823,9 @@ async def create_ark_server(payload: ArkCreatePayload):
     if not name or len(name) > 64 or "\n" in name or "\r" in name:
         return {"status": "error", "message": "Nom de serveur invalide (1 à 64 caractères, sans retour à la ligne)."}
 
-    edition = (payload.edition or "").strip().lower()
-    if edition not in ark_installer.EDITIONS:
-        return {"status": "error", "message": "Édition ARK inconnue : choisis ASE ou ASA."}
-
     map_id = (payload.map or "").strip()
     if not re.match(r"^[A-Za-z0-9_\-\.]{1,64}$", map_id):
-        return {"status": "error", "message": "Nom de map invalide (exemple : TheIsland, TheIsland_WP)."}
+        return {"status": "error", "message": "Nom de map invalide (exemple : TheIsland, Ragnarok)."}
 
     if not (4 <= len(payload.rcon_pass) <= 64) or "\r" in payload.rcon_pass or "\n" in payload.rcon_pass:
         return {"status": "error", "message": "Mot de passe RCON invalide (4 à 64 caractères)."}
@@ -891,14 +879,13 @@ async def create_ark_server(payload: ArkCreatePayload):
             if not os.path.exists(os.path.join(server_path, ark_installer.INSTALL_MARKER)):
                 return {"status": "error", "message": f"Le dossier {server_path} existe déjà et n'est pas vide."}
 
-    app_ids, app_labels, warnings = await ark_installer.resolve_map_apps(edition, map_id)
+    app_ids, app_labels, warnings = await ark_installer.resolve_map_apps(map_id)
 
     new_srv = {
         "id": srv_id,
         "name": name,
         "game": "ark",
         "loader": "ark",
-        "edition": edition,
         "map": map_id,
         "server_port": server_port,
         "query_port": query_port,
@@ -922,7 +909,6 @@ async def create_ark_server(payload: ArkCreatePayload):
 
     params = {
         "name": name,
-        "edition": edition,
         "map": map_id,
         "server_port": server_port,
         "query_port": query_port,
@@ -948,7 +934,6 @@ async def create_ark_server(payload: ArkCreatePayload):
         "preview": {
             "id": srv_id,
             "name": name,
-            "edition": edition,
             "map": map_id,
             "server_port": server_port,
             "query_port": query_port,
@@ -1193,8 +1178,7 @@ def _start_ark(srv: dict, target_dir: str):
                 creationflags=CREATE_NEW_CONSOLE
             )
         else:
-            is_asa = os.path.basename(target_file).lower() == "arkascendedserver.exe"
-            map_name = srv.get("map") or ("TheIsland_WP" if is_asa else "TheIsland")
+            map_name = srv.get("map") or "TheIsland"
             session = re.sub(r"[?&\"']", " ", srv.get("name") or "ARK").strip()[:64] or "ARK"
             url = (
                 f"{map_name}?listen?SessionName={session}"
