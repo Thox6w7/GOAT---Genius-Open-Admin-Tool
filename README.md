@@ -24,6 +24,14 @@ GOAT est un outil local d'administration et de supervision système conçu pour 
 
 ---
 
+## 📦 Téléchargement
+
+Les installeurs Windows sont publiés dans les [releases GitHub](https://github.com/Thox6w7/GOAT---Genius-Open-Admin-Tool/releases).
+Télécharge `GOAT_Setup_PreAlpha.exe`, puis lance-le : les fichiers existants
+(`servers.json`, `servers/`, `backups/`) ne sont pas écrasés.
+
+---
+
 ## 🛠️ Installation & lancement (développement)
 
 ```bash
