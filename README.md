@@ -102,14 +102,19 @@ touchée.
 L'onglet **ARK** (`/ark.html`) gère ARK: Survival Evolved : création automatique via
 SteamCMD, ou import d'une installation déjà présente sur le disque.
 
-- **Création :** `POST /api/ark/servers/create` valide le nom, la map et les ports
-  (champs vides = attribution automatique), puis lance SteamCMD en arrière-plan
+- **Création :** `POST /api/ark/servers/create` valide le nom, la version, la map et les
+  ports (champs vides = attribution automatique), puis lance SteamCMD en arrière-plan
   (`+login anonymous +app_update 376030 validate`). Le panel ne stocke **aucune map** :
   les cartes sont téléchargées avec l'app serveur Steam `376030`. L'avancement se suit
   avec `GET /api/ark/install/status?job_id=...` et s'écrit dans
   `logs/ark-server-<job>.log`.
-- **SteamCMD :** `GET /api/ark/catalog` renvoie l'édition, les maps disponibles et
-  l'état de SteamCMD. `POST /api/ark/steamcmd/install` le télécharge dans
+- **Versions :** deux choix à la création. **Pré-Aquatica (358.24)** est sélectionnée
+  par défaut et mise en avant : elle utilise la branche SteamCMD `-beta preaquatica` et
+  reste compatible avec la majorité des mods existants. **Dernière version (Aquatica)**
+  installe la branche publique : l'update Aquatica a changé le chargement des assets et
+  casse de nombreux mods, qui doivent être recuits.
+- **SteamCMD :** `GET /api/ark/catalog` renvoie l'édition, les versions, les maps
+  disponibles et l'état de SteamCMD. `POST /api/ark/steamcmd/install` le télécharge dans
   `tools/steamcmd/` (ignoré par git) si `steamcmd.exe` n'est pas déjà dans le `PATH`.
 - **Pendant l'installation :** le dossier porte un marqueur `.goat-installing` et reste
   masqué dans la liste. À la fin, le serveur apparaît avec `GameUserSettings.ini` déjà

@@ -548,6 +548,7 @@ class ArkImportPayload(BaseModel):
 class ArkCreatePayload(BaseModel):
     name: str
     map: str = "TheIsland"
+    version: str = ark_installer.DEFAULT_VERSION
     server_port: int = 0
     query_port: int = 0
     rcon_port: int = 0
@@ -827,6 +828,14 @@ async def create_ark_server(payload: ArkCreatePayload):
     if not re.match(r"^[A-Za-z0-9_\-\.]{1,64}$", map_id):
         return {"status": "error", "message": "Nom de map invalide (exemple : TheIsland, Ragnarok)."}
 
+    version_key = (payload.version or "").strip().lower()
+    if version_key not in ark_installer.VERSIONS:
+        return {
+            "status": "error",
+            "message": "Version ARK inconnue : choisis Pré-Aquatica (recommandée pour les mods) ou la dernière version.",
+        }
+    version_info = ark_installer.VERSIONS[version_key]
+
     if not (4 <= len(payload.rcon_pass) <= 64) or "\r" in payload.rcon_pass or "\n" in payload.rcon_pass:
         return {"status": "error", "message": "Mot de passe RCON invalide (4 à 64 caractères)."}
     if len(payload.admin_pass) > 64 or "\r" in payload.admin_pass or "\n" in payload.admin_pass:
@@ -887,6 +896,8 @@ async def create_ark_server(payload: ArkCreatePayload):
         "game": "ark",
         "loader": "ark",
         "map": map_id,
+        "version": version_key,
+        "version_label": version_info["label"],
         "server_port": server_port,
         "query_port": query_port,
         "rcon_host": "127.0.0.1",
@@ -910,6 +921,9 @@ async def create_ark_server(payload: ArkCreatePayload):
     params = {
         "name": name,
         "map": map_id,
+        "version": version_key,
+        "version_label": version_info["label"],
+        "branch": version_info["branch"],
         "server_port": server_port,
         "query_port": query_port,
         "rcon_port": rcon_port,
@@ -929,12 +943,14 @@ async def create_ark_server(payload: ArkCreatePayload):
 
     return {
         "status": "ok",
-        "message": f"Installation de {name} lancée : SteamCMD télécharge {len(app_ids)} application(s).",
+        "message": f"Installation de {name} lancée ({version_info['label']}) : SteamCMD télécharge {len(app_ids)} application(s).",
         "job": ark_installer.public_job(job),
         "preview": {
             "id": srv_id,
             "name": name,
             "map": map_id,
+            "version": version_key,
+            "version_label": version_info["label"],
             "server_port": server_port,
             "query_port": query_port,
             "rcon_port": rcon_port,

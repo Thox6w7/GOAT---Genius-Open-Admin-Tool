@@ -103,6 +103,8 @@
                         <div class="font-mono text-xs text-slate-400 flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
                             <span>ID: <span id="current-server-id" class="text-slate-300">--</span></span>
                             <span>•</span>
+                            <span>VERSION: <span id="current-server-version" class="text-emerald-400 font-bold">--</span></span>
+                            <span>•</span>
                             <span>MAP: <span id="current-server-map" class="text-amber-400 font-bold">--</span></span>
                             <span>•</span>
                             <span>PORT JEU: <span id="current-server-port" class="text-amber-400 font-bold">7777</span></span>
@@ -296,6 +298,18 @@
                     </div>
 
                     <div>
+                        <label class="block text-slate-400 mb-1">Version du serveur :</label>
+                        <select id="create-ark-version" onchange="renderArkVersionNote()" class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500 cursor-pointer">
+                            <option value="preaquatica">Pré-Aquatica (358.24) — recommandé pour les mods</option>
+                            <option value="latest">Dernière version (Aquatica)</option>
+                        </select>
+                    </div>
+                    <div id="create-ark-version-note" class="p-3 rounded bg-emerald-950/30 border border-emerald-700/50 text-emerald-200/90 text-[11px] leading-relaxed">
+                        <i class="fa-solid fa-shield-halved mr-1"></i>
+                        Pré-Aquatica (358.24) est sélectionnée par défaut : elle reste compatible avec la majorité des mods existants, contrairement à l'update Aquatica qui en casse beaucoup. Les joueurs doivent aussi choisir la branche « preaquatica » dans Steam.
+                    </div>
+
+                    <div>
                         <label class="block text-slate-400 mb-1">Map :</label>
                         <select id="create-ark-map" required class="w-full bg-[#060911] border border-slate-800 text-slate-200 px-3 py-2 rounded focus:outline-none focus:border-amber-500 cursor-pointer">
                             <option value="">Chargement...</option>
@@ -463,6 +477,7 @@
             if (!current) {
                 document.getElementById('current-server-title').textContent = "Aucun serveur ARK";
                 document.getElementById('current-server-id').textContent = "--";
+                document.getElementById('current-server-version').textContent = "--";
                 document.getElementById('current-server-map').textContent = "--";
                 document.getElementById('current-server-port').textContent = "--";
                 document.getElementById('current-server-query').textContent = "--";
@@ -474,6 +489,7 @@
 
             document.getElementById('current-server-title').textContent = current.name;
             document.getElementById('current-server-id').textContent = current.id;
+            document.getElementById('current-server-version').textContent = current.version_label || current.version || "--";
             document.getElementById('current-server-map').textContent = current.map || "--";
             document.getElementById('current-server-port').textContent = current.server_port || 7777;
             document.getElementById('current-server-query').textContent = current.query_port || 27015;
@@ -550,6 +566,7 @@
                 const res = await fetch('/api/ark/catalog');
                 arkCatalog = await res.json();
                 renderSteamcmdState(arkCatalog.steamcmd);
+                populateArkVersions();
                 populateArkMaps();
             } catch (err) {
                 icon.className = 'fa-solid fa-triangle-exclamation text-red-400';
@@ -572,6 +589,46 @@
                 text.textContent = "SteamCMD absent : installe-le avant de créer un serveur.";
                 text.title = "";
                 btn.classList.remove('hidden');
+            }
+        }
+
+        function populateArkVersions() {
+            if (!arkCatalog) return;
+            const edition = arkCatalog.edition || {};
+            const versions = edition.versions || [];
+            const select = document.getElementById('create-ark-version');
+            if (!select) return;
+
+            select.innerHTML = '';
+            versions.forEach(v => {
+                const option = document.createElement('option');
+                option.value = v.key;
+                option.textContent = v.recommended ? `${v.label} — recommandé pour les mods` : v.label;
+                select.appendChild(option);
+            });
+
+            const preferred = edition.default_version
+                || (versions.find(v => v.recommended) || versions[0] || {}).key;
+            if (preferred) {
+                select.value = preferred;
+            }
+            renderArkVersionNote();
+        }
+
+        function renderArkVersionNote() {
+            const select = document.getElementById('create-ark-version');
+            const note = document.getElementById('create-ark-version-note');
+            if (!select || !note) return;
+
+            const edition = (arkCatalog && arkCatalog.edition) || {};
+            const version = (edition.versions || []).find(v => v.key === select.value) || {};
+
+            if (version.recommended) {
+                note.className = 'p-3 rounded bg-emerald-950/30 border border-emerald-700/50 text-emerald-200/90 text-[11px] leading-relaxed';
+                note.innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i>${version.mods_note || 'Version recommandée pour les mods.'}`;
+            } else {
+                note.className = 'p-3 rounded bg-amber-950/30 border border-amber-800/50 text-amber-200/90 text-[11px] leading-relaxed';
+                note.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>${version.mods_note || 'Vérifie la compatibilité de tes mods.'}`;
             }
         }
 
@@ -694,6 +751,7 @@
             const payload = {
                 name: document.getElementById('create-ark-name').value.trim(),
                 map: document.getElementById('create-ark-map').value,
+                version: document.getElementById('create-ark-version').value,
                 server_port: portValue('create-ark-game-port'),
                 query_port: portValue('create-ark-query-port'),
                 rcon_port: portValue('create-ark-rcon-port'),

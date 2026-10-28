@@ -52,6 +52,34 @@ EDITION = {
     ],
 }
 
+# Versions proposées à la création. La branche preaquatica est figée sur la
+# version 358.24 (avant l'update Aquatica) : c'est celle qui reste compatible
+# avec la majorité des mods existants.
+VERSIONS = {
+    "preaquatica": {
+        "label": "Pré-Aquatica (358.24)",
+        "game_version": "358.24",
+        "branch": "preaquatica",
+        "recommended": True,
+        "mods_note": (
+            "Version 358.24, avant l'update Aquatica : compatible avec la majorité "
+            "des mods existants. Recommandée pour jouer avec des mods ; les joueurs "
+            "doivent aussi sélectionner la branche « preaquatica » dans Steam."
+        ),
+    },
+    "latest": {
+        "label": "Dernière version (Aquatica)",
+        "game_version": "",
+        "branch": "",
+        "recommended": False,
+        "mods_note": (
+            "L'update Aquatica a changé le chargement des assets : de nombreux mods "
+            "doivent être recuits ou ne fonctionnent plus. À réserver aux serveurs sans mods."
+        ),
+    },
+}
+DEFAULT_VERSION = "preaquatica"
+
 PROGRESS_RE = re.compile(r"progress:\s*([0-9]+(?:\.[0-9]+)?)")
 SUCCESS_RE = re.compile(r"Success!\s+App\s+'(\d+)'\s+fully installed", re.IGNORECASE)
 
@@ -148,6 +176,18 @@ async def catalog_payload():
         "app_id": EDITION["app_id"],
         "default_map": EDITION["default_map"],
         "maps": [{"id": m, "label": lbl} for m, lbl in EDITION["maps"]],
+        "default_version": DEFAULT_VERSION,
+        "versions": [
+            {
+                "key": key,
+                "label": item["label"],
+                "game_version": item["game_version"],
+                "branch": item["branch"],
+                "recommended": item["recommended"],
+                "mods_note": item["mods_note"],
+            }
+            for key, item in VERSIONS.items()
+        ],
         "api_ok": False,
         "message": "",
     }
@@ -190,6 +230,8 @@ def _new_job(kind: str, **extra):
         "server_id": "",
         "name": "",
         "map": "",
+        "version": "",
+        "version_label": "",
         "server_dir": "",
         "app_ids": [],
         "app_labels": [],
@@ -354,6 +396,7 @@ NoBattlEye=True
         f.write(
             f"Serveur ARK créé par GOAT le {_now()}\n"
             f"Jeu       : {EDITION['label']} (app {EDITION['app_id']})\n"
+            f"Version   : {params.get('version_label') or params.get('version') or 'inconnue'}\n"
             f"Map       : {params['map']}\n"
             f"Jeu       : {int(params['server_port'])}\n"
             f"Query     : {int(params['query_port'])}\n"
@@ -367,6 +410,10 @@ def _worker(job, params, on_success):
     try:
         job["state"] = "running"
         job["stage"] = "Préparation de SteamCMD..."
+        if params.get("version_label"):
+            _append(job, f"[INFO] Version demandée : {params['version_label']}")
+            if params.get("branch"):
+                _append(job, f"[INFO] Branche SteamCMD : {params['branch']}")
         exe = steamcmd_path() or _bootstrap_steamcmd(job)
         if not exe:
             raise RuntimeError("SteamCMD introuvable.")
@@ -381,8 +428,12 @@ def _worker(job, params, on_success):
             pass
 
         cmd = [exe, "+force_install_dir", server_dir, "+login", "anonymous"]
+        branch = params.get("branch") or ""
         for app_id in params["app_ids"]:
-            cmd += ["+app_update", str(app_id), "validate"]
+            if branch:
+                cmd += ["+app_update", str(app_id), "-beta", branch, "validate"]
+            else:
+                cmd += ["+app_update", str(app_id), "validate"]
         cmd.append("+quit")
 
         job["stage"] = "Téléchargement du serveur ARK (plusieurs Go)..."
@@ -453,6 +504,8 @@ def start_server_job(params, on_success=None):
         "server",
         name=params["name"],
         map=params["map"],
+        version=params.get("version", ""),
+        version_label=params.get("version_label", ""),
         server_id=params["server_id"],
         server_dir=params["server_dir"],
         app_ids=params["app_ids"],
@@ -500,6 +553,8 @@ def public_job(job):
         "server_id": job["server_id"],
         "name": job["name"],
         "map": job["map"],
+        "version": job["version"],
+        "version_label": job["version_label"],
         "server_dir": job["server_dir"],
         "app_ids": job["app_ids"],
         "app_labels": job["app_labels"],
