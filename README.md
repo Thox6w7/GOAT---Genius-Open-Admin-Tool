@@ -42,14 +42,16 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Le panel écoute sur `http://127.0.0.1:8000`. Au premier lancement, la page de connexion
+Le panel écoute sur `http://localhost:8000`. Au premier lancement, la page de connexion
 propose de définir le mot de passe du panel (8 caractères minimum, stocké haché en
 PBKDF2-SHA256 dans `auth.json`).
 
 ### Accès depuis le réseau local
 
 ```bat
-set SERVER_HOST=0.0.0.0
+:: SERVER_HOST n'est pas défini par défaut : écoute locale uniquement.
+:: Pour ouvrir le panel au réseau, indique ici l'interface d'écoute à exposer.
+set SERVER_HOST=<interface-reseau>
 set SERVER_PORT=8000
 python main.py
 ```
@@ -78,7 +80,7 @@ Fichiers sensibles, ignorés par git : `auth.json`, `secret.key`, `servers.json`
 ### Changer le mot de passe
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/auth/password \
+curl -X POST http://localhost:8000/api/auth/password \
   -H "Content-Type: application/json" \
   -H "Cookie: goat_session=<ton cookie>" \
   -d "{\"current\":\"ancien\",\"new\":\"nouveau-mot-de-passe\"}"
